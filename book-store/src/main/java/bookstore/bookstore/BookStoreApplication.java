@@ -29,8 +29,10 @@ public class BookStoreApplication {
                         theWitcher.setPrice(BigDecimal.TEN);
                         theWitcher.setTitle("The witcher");
                         theWitcher.setIsbn("What is it");
+                        theWitcher.setDescription("A nice book about the monster killer");
+                        theWitcher.setCoverImage("");
                         bookService.save(theWitcher);
-                        bookService.findAll();
+                System.out.println(bookService.findAll());
             }
         };
     }
