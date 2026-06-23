@@ -5,7 +5,6 @@ import java.util.List;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -13,7 +12,6 @@ public class BookRepositoryImpl implements BookRepository {
 
     private final SessionFactory sessionFactory;
 
-    @Autowired
     public BookRepositoryImpl(SessionFactory sessionFactory) {
         this.sessionFactory = sessionFactory;
     }
@@ -28,7 +26,7 @@ public class BookRepositoryImpl implements BookRepository {
             session.persist(book);
             transaction.commit();
             return book;
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             if (transaction != null) {
                 transaction.rollback();
             }
@@ -44,6 +42,8 @@ public class BookRepositoryImpl implements BookRepository {
     public List<Book> findAll() {
         try (Session session = sessionFactory.openSession()) {
             return session.createQuery("select b from Book b", Book.class).getResultList();
+        } catch (RuntimeException ex) {
+            throw new RuntimeException("Couldn't find books", ex);
         }
     }
 }
