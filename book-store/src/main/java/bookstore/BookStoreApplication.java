@@ -1,4 +1,4 @@
-package bookstore.bookstore;
+package bookstore;
 
 import bookstore.bookstore.model.Book;
 import bookstore.bookstore.service.BookService;
