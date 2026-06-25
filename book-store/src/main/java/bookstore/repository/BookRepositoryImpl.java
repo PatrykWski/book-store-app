@@ -22,10 +22,11 @@ public class BookRepositoryImpl implements BookRepository {
         try {
             entityManager = entityManagerFactory.createEntityManager();
             transaction = entityManager.getTransaction();
+            transaction.begin();
             entityManager.persist(book);
             transaction.commit();
             return book;
-        } catch (EntityNotFoundException e) {
+        } catch (RuntimeException e) {
             if (transaction != null) {
                 transaction.rollback();
             }
@@ -41,7 +42,7 @@ public class BookRepositoryImpl implements BookRepository {
     public List<Book> findAll() {
         try (EntityManager entityManager = entityManagerFactory.createEntityManager()) {
             return entityManager.createQuery("select b from Book b", Book.class).getResultList();
-        } catch (EntityNotFoundException ex) {
+        } catch (RuntimeException ex) {
             throw new EntityNotFoundException("Couldn't find books", ex);
         }
     }
@@ -50,7 +51,7 @@ public class BookRepositoryImpl implements BookRepository {
     public Book getBookById(Long id) {
         try (EntityManager entityManager = entityManagerFactory.createEntityManager()) {
             return entityManager.find(Book.class, id);
-        } catch (EntityNotFoundException ex) {
+        } catch (RuntimeException ex) {
             throw new EntityNotFoundException("Couldn't find a book with id: " + id, ex);
         }
     }

@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/books")
+@RequestMapping("api/books")
 @RequiredArgsConstructor
 public class BookController {
 
@@ -21,7 +21,7 @@ public class BookController {
 
     @GetMapping
     List<BookDto> getAll() {
-       return bookService.findAll();
+        return bookService.findAll();
     }
 
     @GetMapping("/{id}")

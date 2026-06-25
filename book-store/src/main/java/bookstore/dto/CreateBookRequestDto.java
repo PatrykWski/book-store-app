@@ -1,9 +1,11 @@
 package bookstore.dto;
 
 import java.math.BigDecimal;
-import org.springframework.stereotype.Component;
+import lombok.Getter;
+import lombok.Setter;
 
-@Component
+@Getter
+@Setter
 public class CreateBookRequestDto {
     private String title;
     private String author;
