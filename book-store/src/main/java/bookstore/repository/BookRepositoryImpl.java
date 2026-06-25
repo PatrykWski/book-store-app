@@ -3,6 +3,7 @@ package bookstore.repository;
 import bookstore.model.Book;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.EntityTransaction;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -24,11 +25,11 @@ public class BookRepositoryImpl implements BookRepository {
             entityManager.persist(book);
             transaction.commit();
             return book;
-        } catch (RuntimeException e) {
+        } catch (EntityNotFoundException e) {
             if (transaction != null) {
                 transaction.rollback();
             }
-            throw new RuntimeException("Couldn't save a book to DB", e);
+            throw new EntityNotFoundException("Couldn't save a book to DB", e);
         } finally {
             if (entityManager != null) {
                 entityManager.close();
@@ -40,8 +41,8 @@ public class BookRepositoryImpl implements BookRepository {
     public List<Book> findAll() {
         try (EntityManager entityManager = entityManagerFactory.createEntityManager()) {
             return entityManager.createQuery("select b from Book b", Book.class).getResultList();
-        } catch (RuntimeException ex) {
-            throw new RuntimeException("Couldn't find books", ex);
+        } catch (EntityNotFoundException ex) {
+            throw new EntityNotFoundException("Couldn't find books", ex);
         }
     }
 
@@ -49,8 +50,8 @@ public class BookRepositoryImpl implements BookRepository {
     public Book getBookById(Long id) {
         try (EntityManager entityManager = entityManagerFactory.createEntityManager()) {
             return entityManager.find(Book.class, id);
-        } catch (RuntimeException ex) {
-            throw new RuntimeException("Couldn't find a book with id: " + id, ex);
+        } catch (EntityNotFoundException ex) {
+            throw new EntityNotFoundException("Couldn't find a book with id: " + id, ex);
         }
     }
 }
