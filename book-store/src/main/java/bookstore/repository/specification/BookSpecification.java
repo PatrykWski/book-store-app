@@ -17,7 +17,8 @@ public class BookSpecification {
         }
         return new Specification<Book>() {
             @Override
-            public @Nullable Predicate toPredicate(Root<Book> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
+            public @Nullable Predicate toPredicate(Root<Book> root, CriteriaQuery<?> query,
+                                                   CriteriaBuilder criteriaBuilder) {
                 return criteriaBuilder.equal(root.get(fieldName), value);
             }
         };
@@ -31,7 +32,7 @@ public class BookSpecification {
         return create("author", author);
     }
 
-    public static Specification<Book> getByISBN(String isbn) {
+    public static Specification<Book> getByIsbn(String isbn) {
         return create("isbn", isbn);
     }
 
