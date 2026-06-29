@@ -11,7 +11,7 @@ import org.springframework.data.jpa.domain.Specification;
 
 public class BookSpecification {
 
-    private static Specification<Book> create(String fieldName, Object value) {
+    private static Specification<Book> create(String fieldName, String value) {
         if (value == null) {
             return null;
         }
@@ -19,7 +19,8 @@ public class BookSpecification {
             @Override
             public @Nullable Predicate toPredicate(Root<Book> root, CriteriaQuery<?> query,
                                                    CriteriaBuilder criteriaBuilder) {
-                return criteriaBuilder.equal(root.get(fieldName), value);
+                return criteriaBuilder.like(criteriaBuilder.lower(root.get(fieldName)),
+                        "%" + value.toLowerCase() + "%");
             }
         };
     }
@@ -37,14 +38,14 @@ public class BookSpecification {
     }
 
     public static Specification<Book> getByPrice(BigDecimal price) {
-        return create("price", price);
-    }
-
-    public static Specification<Book> getByDescription(String description) {
-        return create("description", description);
-    }
-
-    public static Specification<Book> getByCoverImage(String coverImage) {
-        return create("coverImage", coverImage);
+        if (price == null) {
+            return null;
+        }
+        return new Specification<Book>() {
+            @Override
+            public @Nullable Predicate toPredicate(Root<Book> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
+                return criteriaBuilder.equal(root.get("price"), price);
+            }
+        };
     }
 }

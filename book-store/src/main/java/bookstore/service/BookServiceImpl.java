@@ -7,7 +7,7 @@ import bookstore.exception.EntityNotFoundException;
 import bookstore.mapper.BookMapper;
 import bookstore.model.Book;
 import bookstore.repository.BookRepository;
-import bookstore.repository.specification.BookBuilderFactory;
+import bookstore.repository.specification.BookSpecificationBuilder;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
@@ -21,7 +21,7 @@ public class BookServiceImpl implements BookService {
 
     private final BookMapper bookMapper;
 
-    private final BookBuilderFactory bookBuilderFactory;
+    private final BookSpecificationBuilder bookSpecificationBuilder;
 
     @Override
     public BookDto save(CreateBookRequestDto createBookRequestDto) {
@@ -64,7 +64,7 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public List<BookDto> search(BookSearchParametersDto bookSearchParametersDto) {
-        Specification<Book> booksSpecifications = bookBuilderFactory
+        Specification<Book> booksSpecifications = bookSpecificationBuilder
                 .create(bookSearchParametersDto);
         return bookRepository.findAll(booksSpecifications).stream()
                 .map(bookMapper::toDto)

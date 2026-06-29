@@ -1,30 +1,14 @@
 package bookstore.dto;
 
 import java.math.BigDecimal;
+import lombok.Getter;
+import lombok.Setter;
 
-public record BookSearchParametersDto(String title, String author, BigDecimal price,
-                                      String isbn, String description, String coverImage) {
-    public String getTitle() {
-        return title;
-    }
-
-    public String getAuthor() {
-        return author;
-    }
-
-    public BigDecimal getPrice() {
-        return price;
-    }
-
-    public String getIsbn() {
-        return isbn;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public String getCoverImage() {
-        return coverImage;
-    }
+@Getter
+@Setter
+public class BookSearchParametersDto {
+    private String title;
+    private String author;
+    private BigDecimal price;
+    private String isbn;
 }
