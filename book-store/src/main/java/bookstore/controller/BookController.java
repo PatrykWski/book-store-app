@@ -30,7 +30,7 @@ public class BookController {
 
     @GetMapping("/{id}")
     public BookDto getBookById(@PathVariable Long id) {
-        return bookService.findBookById(id);
+        return bookService.findById(id);
     }
 
     @ResponseStatus(HttpStatus.CREATED)
