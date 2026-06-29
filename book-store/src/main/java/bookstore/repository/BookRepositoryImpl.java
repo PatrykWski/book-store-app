@@ -1,6 +1,5 @@
 package bookstore.repository;
 
-import bookstore.exception.EntityNotFoundException;
 import bookstore.model.Book;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
