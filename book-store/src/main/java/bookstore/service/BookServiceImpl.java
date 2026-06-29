@@ -47,11 +47,10 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public BookDto deleteBookById(Long id) {
+    public void deleteBookById(Long id) {
         Book book = checkIfBookExist(id);
         BookDto bookDto = bookMapper.toDto(book);
         bookRepository.deleteById(id);
-        return bookDto;
     }
 
     private Book checkIfBookExist(Long id) {
