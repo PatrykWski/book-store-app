@@ -1,6 +1,6 @@
-package bookstore.bookstore.repository;
+package bookstore.repository;
 
-import bookstore.bookstore.model.Book;
+import bookstore.model.Book;
 import java.util.List;
 
 public interface BookRepository {
@@ -8,4 +8,6 @@ public interface BookRepository {
     Book save(Book book);
 
     List<Book> findAll();
+
+    Book getBookById(Long id);
 }
