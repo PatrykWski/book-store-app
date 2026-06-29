@@ -11,7 +11,7 @@ import org.springframework.data.jpa.domain.Specification;
 
 public class BookSpecification {
 
-    private static Specification<Book> create(String fieldName, String value) {
+    private static Specification<Book> containsIgnoreCase(String fieldName, String value) {
         if (value == null) {
             return null;
         }
@@ -25,27 +25,32 @@ public class BookSpecification {
         };
     }
 
-    public static Specification<Book> getByTitle(String title) {
-        return create("title", title);
-    }
-
-    public static Specification<Book> getByAuthor(String author) {
-        return create("author", author);
-    }
-
-    public static Specification<Book> getByIsbn(String isbn) {
-        return create("isbn", isbn);
-    }
-
-    public static Specification<Book> getByPrice(BigDecimal price) {
-        if (price == null) {
+    private static Specification<Book> equalsValue(String fieldName, Object value) {
+        if (value == null) {
             return null;
         }
         return new Specification<Book>() {
             @Override
-            public @Nullable Predicate toPredicate(Root<Book> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
-                return criteriaBuilder.equal(root.get("price"), price);
+            public @Nullable Predicate toPredicate(Root<Book> root, CriteriaQuery<?> query,
+                                                   CriteriaBuilder criteriaBuilder) {
+                return criteriaBuilder.equal(root.get(fieldName), value);
             }
         };
+    }
+
+    public static Specification<Book> getByTitle(String title) {
+        return containsIgnoreCase("title", title);
+    }
+
+    public static Specification<Book> getByAuthor(String author) {
+        return containsIgnoreCase("author", author);
+    }
+
+    public static Specification<Book> getByIsbn(String isbn) {
+        return containsIgnoreCase("isbn", isbn);
+    }
+
+    public static Specification<Book> getByPrice(BigDecimal price) {
+        return equalsValue("price", price);
     }
 }
