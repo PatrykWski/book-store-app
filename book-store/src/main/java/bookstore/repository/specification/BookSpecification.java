@@ -6,6 +6,8 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import org.jspecify.annotations.Nullable;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -25,15 +27,19 @@ public class BookSpecification {
         };
     }
 
-    private static Specification<Book> equalsValue(String fieldName, Object value) {
-        if (value == null) {
-            return null;
-        }
+    private static Specification<Book> getByPriceRange(BigDecimal min, BigDecimal max) {
         return new Specification<Book>() {
             @Override
             public @Nullable Predicate toPredicate(Root<Book> root, CriteriaQuery<?> query,
                                                    CriteriaBuilder criteriaBuilder) {
-                return criteriaBuilder.equal(root.get(fieldName), value);
+                List<Predicate> predicates = new ArrayList<>();
+                if (min != null) {
+                    predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("price"), min));
+                }
+                if (max != null) {
+                    predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("price"), max));
+                }
+                return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
             }
         };
     }
@@ -50,7 +56,7 @@ public class BookSpecification {
         return containsIgnoreCase("isbn", isbn);
     }
 
-    public static Specification<Book> getByPrice(BigDecimal price) {
-        return equalsValue("price", price);
+    public static Specification<Book> getByPrice(BigDecimal min, BigDecimal max) {
+        return getByPriceRange(min, max);
     }
 }

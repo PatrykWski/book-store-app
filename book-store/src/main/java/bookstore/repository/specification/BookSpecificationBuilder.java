@@ -11,7 +11,8 @@ public class BookSpecificationBuilder {
         return new SpecificationBuilder<Book>()
                 .with(BookSpecification.getByAuthor(bookSearchParametersDto.getAuthor()))
                 .with(BookSpecification.getByIsbn(bookSearchParametersDto.getIsbn()))
-                .with(BookSpecification.getByPrice(bookSearchParametersDto.getPrice()))
+                .with(BookSpecification.getByPrice(bookSearchParametersDto.getMin(),
+                        bookSearchParametersDto.getMax()))
                 .with(BookSpecification.getByTitle(bookSearchParametersDto.getTitle()))
                 .build();
     }
