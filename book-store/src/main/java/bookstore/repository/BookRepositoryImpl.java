@@ -42,8 +42,6 @@ public class BookRepositoryImpl implements BookRepository {
     public List<Book> findAll() {
         try (EntityManager entityManager = entityManagerFactory.createEntityManager()) {
             return entityManager.createQuery("select b from Book b", Book.class).getResultList();
-        } catch (RuntimeException ex) {
-            throw new EntityNotFoundException("Couldn't find books");
         }
     }
 
@@ -51,8 +49,6 @@ public class BookRepositoryImpl implements BookRepository {
     public Book getBookById(Long id) {
         try (EntityManager entityManager = entityManagerFactory.createEntityManager()) {
             return entityManager.find(Book.class, id);
-        } catch (RuntimeException ex) {
-            throw new EntityNotFoundException("Couldn't find a book with id: " + id);
         }
     }
 }
