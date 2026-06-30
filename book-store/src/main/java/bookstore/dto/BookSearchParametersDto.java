@@ -9,7 +9,7 @@ import lombok.Setter;
 public class BookSearchParametersDto {
     private String title;
     private String author;
-    private BigDecimal min;
-    private BigDecimal max;
+    private BigDecimal minPrice;
+    private BigDecimal maxPrice;
     private String isbn;
 }

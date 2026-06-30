@@ -27,17 +27,17 @@ public class BookSpecification {
         };
     }
 
-    private static Specification<Book> getByPriceRange(BigDecimal min, BigDecimal max) {
+    private static Specification<Book> getByPriceRange(BigDecimal minPrice, BigDecimal maxPrice) {
         return new Specification<Book>() {
             @Override
             public @Nullable Predicate toPredicate(Root<Book> root, CriteriaQuery<?> query,
                                                    CriteriaBuilder criteriaBuilder) {
                 List<Predicate> predicates = new ArrayList<>();
-                if (min != null) {
-                    predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("price"), min));
+                if (minPrice != null) {
+                    predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("price"), minPrice));
                 }
-                if (max != null) {
-                    predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("price"), max));
+                if (maxPrice != null) {
+                    predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("price"), maxPrice));
                 }
                 return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
             }
