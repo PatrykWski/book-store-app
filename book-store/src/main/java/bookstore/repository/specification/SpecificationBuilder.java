@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.data.jpa.domain.Specification;
 
 public class SpecificationBuilder<T> {
-    private List<Specification<T>> specs = new ArrayList<>();
+    private final List<Specification<T>> specs = new ArrayList<>();
 
     public SpecificationBuilder<T> with(Specification<T> spec) {
         if (spec != null) {
