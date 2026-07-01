@@ -7,9 +7,11 @@ import bookstore.service.BookService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -31,13 +33,16 @@ public class BookController {
     private final BookService bookService;
 
     @GetMapping
-    @Operation(summary = "Get all products", description = "Get all products from DB")
-    public List<BookDto> getAll(Pageable pageable) {
+    @Operation(summary = "Get all books",
+            description = "Get all books with pagination and sorting")
+    public Page<BookDto> getAll(
+            @ParameterObject
+            @PageableDefault(size = 10, sort = "title") Pageable pageable) {
         return bookService.findAll(pageable);
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Get exact product", description = "Get product by ID")
+    @Operation(summary = "Get exact book", description = "Get book by ID")
     public BookDto getBookById(@PathVariable Long id) {
         return bookService.findById(id);
     }
@@ -64,8 +69,9 @@ public class BookController {
     }
 
     @GetMapping("/search")
-    @Operation(summary = "Search list of books", description = "Search list of books by parameters")
-    public List<BookDto> search(@Valid BookSearchParametersDto bookSearchParametersDto,
+    @Operation(summary = "Search list of books",
+            description = "Search list of books by parameters")
+    public Page<BookDto> search(@Valid BookSearchParametersDto bookSearchParametersDto,
                                 Pageable pageable) {
         return bookService.search(bookSearchParametersDto, pageable);
     }
