@@ -19,4 +19,10 @@ public class RegisterRequestDto {
     private String password;
     @Length(min = 8, max = 20)
     private String repeatPassword;
+    @NotBlank
+    private String firstName;
+    @NotBlank
+    private String lastName;
+    @NotBlank
+    private String shippingAddress;
 }
