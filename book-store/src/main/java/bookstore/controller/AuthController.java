@@ -6,6 +6,7 @@ import bookstore.dto.user.UserResponseDto;
 import bookstore.security.AuthenticationService;
 import bookstore.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@Tag(name = "Authentication controller", description = "Endpoints for authentication")
 @RequestMapping("api/auth")
 @RequiredArgsConstructor
 @Validated
