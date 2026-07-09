@@ -6,5 +6,6 @@ import bookstore.exception.RegistrationException;
 import jakarta.validation.Valid;
 
 public interface UserService {
-    UserResponseDto register(@Valid RegisterRequestDto registerRequestDto) throws RegistrationException;
+    UserResponseDto register(
+            @Valid RegisterRequestDto registerRequestDto) throws RegistrationException;
 }

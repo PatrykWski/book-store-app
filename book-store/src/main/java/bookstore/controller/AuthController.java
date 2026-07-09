@@ -27,7 +27,7 @@ public class AuthController {
     @PostMapping("/registration")
     @Operation(summary = "Register an user", description = "Register an user by login and password")
     @ResponseStatus(HttpStatus.CREATED)
-    public UserResponseDto register (@Valid @RequestBody RegisterRequestDto registerRequestDto) {
+    public UserResponseDto register(@Valid @RequestBody RegisterRequestDto registerRequestDto) {
         return userService.register(registerRequestDto);
     }
 

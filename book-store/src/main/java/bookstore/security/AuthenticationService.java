@@ -14,6 +14,7 @@ public class AuthenticationService {
 
     public boolean authenticate(UserLoginRequestDto userLoginRequestDto) {
         Optional<User> user = userRepository.findByEmail(userLoginRequestDto.getEmail());
-        return user.isPresent() && user.get().getPassword().equals(userLoginRequestDto.getPassword());
+        return user.isPresent() && user.get().getPassword()
+                .equals(userLoginRequestDto.getPassword());
     }
 }
