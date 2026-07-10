@@ -35,7 +35,7 @@ public class AuthenticationController {
 
     @PostMapping("/login")
     @Operation(summary = "Log in", description = "Authenticates a user using their credentials")
-    public boolean login(@Valid @RequestBody UserLoginRequestDto requestDto) {
+    public UserResponseDto login(@Valid @RequestBody UserLoginRequestDto requestDto) {
         return authenticationService.authenticate(requestDto);
     }
 }
