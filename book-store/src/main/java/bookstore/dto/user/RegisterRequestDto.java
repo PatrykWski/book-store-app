@@ -3,9 +3,9 @@ package bookstore.dto.user;
 import bookstore.annotation.FieldMatch;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.validator.constraints.Length;
 
 @Getter
 @Setter
@@ -15,14 +15,14 @@ public class RegisterRequestDto {
     @Email
     private String email;
     @NotBlank
-    @Length(min = 8, max = 20)
+    @Size(min = 8, max = 20)
     private String password;
-    @Length(min = 8, max = 20)
+    @NotBlank
+    @Size(min = 8, max = 20)
     private String repeatPassword;
     @NotBlank
     private String firstName;
     @NotBlank
     private String lastName;
-    @NotBlank
     private String shippingAddress;
 }

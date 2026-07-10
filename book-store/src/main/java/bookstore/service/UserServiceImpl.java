@@ -21,16 +21,10 @@ public class UserServiceImpl implements UserService {
     public UserResponseDto register(
             RegisterRequestDto registerRequestDto) throws RegistrationException {
         if (userRepository.findByEmail(registerRequestDto.getEmail()).isPresent()) {
-            throw new RegistrationException("User with this email already exist");
+            throw new RegistrationException("A User with this email already exists");
         }
-        User user = new User();
-        user.setEmail(registerRequestDto.getEmail());
-        String hashedPassword = passwordEncoder.encode(registerRequestDto.getPassword());
-        user.setPassword(hashedPassword);
-        user.setFirstName(registerRequestDto.getFirstName());
-        user.setLastName(registerRequestDto.getLastName());
-        user.setShippingAddress(registerRequestDto.getShippingAddress());
-        User savedUser = userRepository.save(user);
-        return mapper.registerToDto(savedUser);
+        User user = mapper.toModel(registerRequestDto);
+        user.setPassword(passwordEncoder.encode(registerRequestDto.getPassword()));
+        return mapper.toDto(userRepository.save(user));
     }
 }

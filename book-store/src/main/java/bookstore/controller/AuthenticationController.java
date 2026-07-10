@@ -22,19 +22,19 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("api/auth")
 @RequiredArgsConstructor
 @Validated
-public class AuthController {
+public class AuthenticationController {
     private final UserService userService;
     private final AuthenticationService authenticationService;
 
     @PostMapping("/registration")
-    @Operation(summary = "Register an user", description = "Register an user by login and password")
+    @Operation(summary = "Register a user", description = "Register a new user")
     @ResponseStatus(HttpStatus.CREATED)
     public UserResponseDto register(@Valid @RequestBody RegisterRequestDto registerRequestDto) {
         return userService.register(registerRequestDto);
     }
 
     @PostMapping("/login")
-    @Operation(summary = "Login", description = "Checking if its authenticated and login an user")
+    @Operation(summary = "Log in", description = "Authenticates a user using their credentials")
     public boolean login(@Valid @RequestBody UserLoginRequestDto requestDto) {
         return authenticationService.authenticate(requestDto);
     }

@@ -1,6 +1,6 @@
 package bookstore.annotation;
 
-import bookstore.validator.PasswordValidator;
+import bookstore.validator.FieldMatchValidator;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 import java.lang.annotation.ElementType;
@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
 
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy = PasswordValidator.class)
+@Constraint(validatedBy = FieldMatchValidator.class)
 public @interface FieldMatch {
     String message() default "Fields do not match";
     String first();
