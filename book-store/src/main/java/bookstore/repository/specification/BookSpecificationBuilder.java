@@ -1,6 +1,6 @@
 package bookstore.repository.specification;
 
-import bookstore.dto.BookSearchParametersDto;
+import bookstore.dto.book.BookSearchParametersDto;
 import bookstore.model.Book;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
