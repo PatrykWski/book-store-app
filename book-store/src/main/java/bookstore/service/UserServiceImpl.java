@@ -14,17 +14,17 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
-    private final UserMapper mapper;
+    private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
 
     @Override
     public UserResponseDto register(
             RegisterRequestDto registerRequestDto) throws RegistrationException {
         if (userRepository.findByEmail(registerRequestDto.getEmail()).isPresent()) {
-            throw new RegistrationException("A User with this email already exists");
+            throw new RegistrationException("Incorrect login or password");
         }
-        User user = mapper.toModel(registerRequestDto);
+        User user = userMapper.toModel(registerRequestDto);
         user.setPassword(passwordEncoder.encode(registerRequestDto.getPassword()));
-        return mapper.toDto(userRepository.save(user));
+        return userMapper.toDto(userRepository.save(user));
     }
 }
