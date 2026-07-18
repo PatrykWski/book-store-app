@@ -1,0 +1,9 @@
+databaseChangeLog:
+  - changeSet:
+      author: Patryk
+      id: change-boolean-into-bit
+      changes:
+        - modifyDataType:
+            tableName: categories
+            columnName: is_deleted
+            newDataType: BIT

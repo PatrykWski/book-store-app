@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-descriptions-to-categories
+      author: Patryk
+      changes:
+        - addColumn:
+            tableName: categories
+            columns:
+              - column:
+                  name: description
+                  type: varchar(255)
