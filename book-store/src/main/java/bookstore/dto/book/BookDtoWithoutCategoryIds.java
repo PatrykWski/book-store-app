@@ -1,13 +1,12 @@
 package bookstore.dto.book;
 
 import java.math.BigDecimal;
-import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
 
 @Setter
 @Getter
-public class BookDto {
+public class BookDtoWithoutCategoryIds {
     private Long id;
     private String title;
     private String author;
@@ -15,5 +14,4 @@ public class BookDto {
     private String isbn;
     private String description;
     private String coverImage;
-    private Set<Long> categoryId;
 }
