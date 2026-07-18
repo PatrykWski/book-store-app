@@ -1,47 +1,55 @@
 package bookstore.security;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import java.security.Key;
 import java.util.Date;
+import javax.crypto.SecretKey;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 @Component
 public class JwtUtil {
-    private static final String SECRET = "";
-    private static final long expiration = 1L;
+
+    private final Key key;
+
+    @Value("${jwt.expiration}")
+    private long expiration;
+
+    public JwtUtil(@Value("${jwt.secret}") String secret) {
+        this.key = Keys.hmacShaKeyFor(secret.getBytes());
+    }
 
     public String generateToken(UserDetails userDetails) {
         return Jwts.builder()
                 .subject(userDetails.getUsername())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + expiration))
-                .signWith(Keys.hmacShaKeyFor(Decoders.BASE64.decode(SECRET)))
+                .signWith(key)
                 .compact();
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
-        final String userName = extractUsername(token);
-        return (userName.equals(userDetails.getUsername())) && !isTokenExpired(token);
+        final String userName = getUsername(token);
+        return (userName.equals(userDetails.getUsername()))
+                && !getExpiration(token).before(new Date());
     }
 
-    public String extractUsername(String token) {
-        return Jwts.parser()
-                .verifyWith(Keys.hmacShaKeyFor(Decoders.BASE64.decode(SECRET)))
-                .build()
-                .parseSignedClaims(token)
-                .getPayload()
-                .getSubject();
+    public String getUsername(String token) {
+        return getClaim(token).getSubject();
     }
 
-    private boolean isTokenExpired(String token) {
+    private Date getExpiration(String token) {
+        return getClaim(token).getExpiration();
+    }
+
+    private Claims getClaim(String token) {
         return Jwts.parser()
-                .verifyWith(Keys.hmacShaKeyFor(Decoders.BASE64.decode(SECRET)))
+                .verifyWith((SecretKey) key)
                 .build()
                 .parseSignedClaims(token)
-                .getPayload()
-                .getExpiration()
-                .before(new Date());
+                .getPayload();
     }
 }
