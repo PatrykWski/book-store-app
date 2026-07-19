@@ -16,6 +16,7 @@ import bookstore.repository.OrderRepository;
 import bookstore.repository.ShoppingCartRepository;
 import bookstore.repository.UserRepository;
 import java.math.BigDecimal;
+import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
@@ -67,27 +68,60 @@ public class OrderServiceImpl implements OrderService {
         orderItemRepository.saveAll(orderItems);
         savedOrder.setOrderItems(orderItems);
 
-        return orderItemMapper.toDto(savedOrder);
+        return orderItemMapper.toOrderResponseDto(savedOrder);
     }
 
     @Override
     public List<OrderResponseDto> viewHistory(String email) {
-        return List.of();
+        User user = userRepository.findByEmail(email).orElseThrow(
+                () -> new EntityNotFoundException("User with email: " + email + " doesn't exist"));
+
+        List<Order> orders = orderRepository.findAllByUser(user);
+
+        return orders.stream()
+                .map(orderItemMapper::toOrderResponseDto)
+                .toList();
     }
 
     @Override
-    public Set<OrderItemResponseDto> getOrderItems(String email, Long orderId) {
-        return Set.of();
+    public Set<OrderItemResponseDto> getOrderItems(
+            String email, Long orderId) throws AccessDeniedException {
+        User user = userRepository.findByEmail(email).orElseThrow(
+                () -> new EntityNotFoundException("User with email: " + email + " doesn't exist"));
+
+        Order order = orderRepository.getOrderById(orderId);
+
+        if (order != null && order.getUser().equals(user)) {
+            return order.getOrderItems().stream()
+                    .map(orderItemMapper::toItemResponseDto)
+                    .collect(Collectors.toSet());
+        }
+        throw new AccessDeniedException("You have no access to this method");
     }
 
     @Override
     public Optional<OrderItemResponseDto> getOrderItemById(String email, Long bookId) {
-        return Optional.empty();
+        User user = userRepository.findByEmail(email).orElseThrow(
+                () -> new EntityNotFoundException("User with email: " + email + " doesn't exist"));
+
+        Order order = orderRepository.getOrderByUser(user);
+
+        return order.getOrderItems().stream()
+                .filter(orderItem -> orderItem.getBook().getId().equals(bookId))
+                .map(orderItemMapper::toItemResponseDto)
+                .findFirst();
+
     }
 
     @Override
     public OrderResponseDto updateOrderStatus(Long orderId, UpdateOrderStatusDto statusDto) {
-        return null;
+
+        Order order = orderRepository.getOrderById(orderId);
+
+        order.setStatus(statusDto.status());
+        Order savedOrder = orderRepository.save(order);
+
+        return orderItemMapper.toOrderResponseDto(savedOrder);
     }
 
     private BigDecimal countSum(Set<OrderItem> orderItems) {

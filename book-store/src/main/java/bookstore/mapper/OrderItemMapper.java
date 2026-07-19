@@ -1,6 +1,7 @@
 package bookstore.mapper;
 
 import bookstore.dto.order.OrderResponseDto;
+import bookstore.dto.orderitem.OrderItemResponseDto;
 import bookstore.model.CartItem;
 import bookstore.model.Order;
 import bookstore.model.OrderItem;
@@ -15,5 +16,7 @@ public interface OrderItemMapper {
     @Mapping(target = "price", source = "book.price")
     OrderItem toOrderItem(CartItem cartItem);
 
-    OrderResponseDto toDto(Order order);
+    OrderResponseDto toOrderResponseDto(Order order);
+
+    OrderItemResponseDto toItemResponseDto(OrderItem orderItem);
 }
