@@ -1,7 +1,8 @@
 package bookstore.service;
 
-import bookstore.dto.cartItem.AddBookRequestDto;
-import bookstore.dto.shoppingCart.ShoppingCartResponseDto;
+import bookstore.dto.cartitem.AddBookRequestDto;
+import bookstore.dto.shoppingcart.ShoppingCartResponseDto;
+import bookstore.dto.shoppingcart.UpdateShoppingCartQuantityDto;
 import bookstore.exception.CartItemFoundException;
 import bookstore.exception.EntityNotFoundException;
 import bookstore.mapper.ShoppingCartMapper;
@@ -12,11 +13,11 @@ import bookstore.model.User;
 import bookstore.repository.BookRepository;
 import bookstore.repository.ShoppingCartRepository;
 import bookstore.repository.UserRepository;
-import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -29,7 +30,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     @Override
     @Transactional
     public ShoppingCartResponseDto addABookToACart(String email,
-                                                 AddBookRequestDto addBookRequestDto) {
+                                                   AddBookRequestDto addBookRequestDto) {
         User user = userRepository.findByEmail(email).orElseThrow(
                 () -> new UsernameNotFoundException("User with email: " + email
                         + " doesn't exist"));
@@ -69,27 +70,51 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
 
     @Override
     @Transactional
-    public ShoppingCartResponseDto deleteABookFromTheCart(String email, Long id) {
+    public ShoppingCartResponseDto deleteABookFromTheCart(String email, Long cartItemId) {
         User user = userRepository.findByEmail(email).orElseThrow(
                 () -> new UsernameNotFoundException("User with email: " + email
                         + " doesn't exist"));
         ShoppingCart shoppingCart = getOrCreateShoppingCart(user);
-        Optional<CartItem> cartItem = shoppingCart.getCartItems().stream()
-                .filter(cartItem1 -> cartItem1.getBook().getId().equals(id))
-                .findFirst();
-        if (cartItem.isPresent()) {
-            shoppingCart.getCartItems().remove(cartItem);
-            return shoppingCartMapper.toDto(shoppingCart);
-        }
-        throw new EntityNotFoundException("Book with id: " + id + " doesn't exist");
+
+        CartItem cartItem = shoppingCart.getCartItems().stream()
+                .filter(cartItem1 -> cartItem1.getId().equals(cartItemId))
+                .findFirst()
+                .orElseThrow(
+                        () -> new EntityNotFoundException("CartItem with id: " + cartItemId
+                                + " doesn't exist"));
+        shoppingCart.getCartItems().remove(cartItem);
+
+        return shoppingCartMapper.toDto(shoppingCart);
+    }
+
+    @Override
+    @Transactional
+    public ShoppingCartResponseDto updateABookInTheCart(
+            String email, Long cartItemId,
+            UpdateShoppingCartQuantityDto updateShoppingCartQuantityDto) {
+        User user = userRepository.findByEmail(email).orElseThrow(
+                () -> new EntityNotFoundException("User with email: " + email + " doesn't exist"));
+
+        ShoppingCart shoppingCart = getOrCreateShoppingCart(user);
+
+        CartItem cartItem = shoppingCart.getCartItems().stream()
+                .filter(item -> item.getId().equals(cartItemId))
+                .findFirst()
+                .orElseThrow(
+                        () -> new EntityNotFoundException("CartItem with id: " + cartItemId
+                                + " doesn't exist"));
+
+        cartItem.setQuantity(updateShoppingCartQuantityDto.quantity());
+
+        return shoppingCartMapper.toDto(shoppingCart);
     }
 
     private ShoppingCart getOrCreateShoppingCart(User user) {
         return shoppingCartRepository.getShoppingCartByUserId(user.getId()).orElseGet(
                 () -> {
-                    ShoppingCart sC = new ShoppingCart();
-                    sC.setUser(user);
-                    return shoppingCartRepository.save(sC);
+                    ShoppingCart shoppingCart = new ShoppingCart();
+                    shoppingCart.setUser(user);
+                    return shoppingCartRepository.save(shoppingCart);
                 });
     }
 }

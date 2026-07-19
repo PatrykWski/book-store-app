@@ -1,6 +1,6 @@
 package bookstore.mapper;
 
-import bookstore.dto.shoppingCart.ShoppingCartResponseDto;
+import bookstore.dto.shoppingcart.ShoppingCartResponseDto;
 import bookstore.model.ShoppingCart;
 import org.mapstruct.Mapper;
 
