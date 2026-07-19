@@ -69,4 +69,15 @@ public class CustomGlobalExceptionHandler extends ResponseEntityExceptionHandler
         );
         return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
     }
+
+    @ExceptionHandler(CartItemFoundException.class)
+    public ResponseEntity<Object> handleCartItemFoundException(CartItemFoundException ex) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.CONFLICT.value(),
+                "Conflict",
+                List.of(ex.getMessage())
+        );
+        return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
+    }
 }
