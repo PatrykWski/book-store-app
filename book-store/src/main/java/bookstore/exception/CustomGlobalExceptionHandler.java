@@ -69,15 +69,4 @@ public class CustomGlobalExceptionHandler extends ResponseEntityExceptionHandler
         );
         return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
     }
-
-    @ExceptionHandler(CategoryNotFoundException.class)
-    public ResponseEntity<Object> handleCategoryException(CategoryNotFoundException ex) {
-        ErrorResponse errorResponse = new ErrorResponse(
-                LocalDateTime.now(),
-                HttpStatus.NOT_FOUND.value(),
-                "Not found",
-                List.of(ex.getMessage())
-        );
-        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
-    }
 }

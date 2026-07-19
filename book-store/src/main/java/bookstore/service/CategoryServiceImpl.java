@@ -3,7 +3,7 @@ package bookstore.service;
 import bookstore.dto.book.BookDtoWithoutCategoryIds;
 import bookstore.dto.category.CategoryDto;
 import bookstore.dto.category.CategoryRequestDto;
-import bookstore.exception.CategoryNotFoundException;
+import bookstore.exception.EntityNotFoundException;
 import bookstore.mapper.BookMapper;
 import bookstore.mapper.CategoryMapper;
 import bookstore.model.Category;
@@ -31,7 +31,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public CategoryDto getById(Long id) {
         Category category = categoryRepository.findById(id).orElseThrow(
-                () -> new CategoryNotFoundException("Category with id: " + id + " doesn't exist"));
+                () -> new EntityNotFoundException("Category with id: " + id + " doesn't exist"));
         return categoryMapper.toDto(category);
     }
 
@@ -45,7 +45,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public CategoryDto update(Long id, CategoryRequestDto categoryRequestDto) {
         Category category = categoryRepository.findById(id).orElseThrow(
-                () -> new CategoryNotFoundException("Category with id: " + id + " doesn't exist"));
+                () -> new EntityNotFoundException("Category with id: " + id + " doesn't exist"));
         category.setDescription(categoryRequestDto.getDescription());
         category.setName(categoryRequestDto.getName());
         Category savedCategory = categoryRepository.save(category);
@@ -57,7 +57,7 @@ public class CategoryServiceImpl implements CategoryService {
         if (categoryRepository.findById(id).isPresent()) {
             categoryRepository.deleteById(id);
         }
-        throw new CategoryNotFoundException("Category with id: " + id + " doesn't exist");
+        throw new EntityNotFoundException("Category with id: " + id + " doesn't exist");
     }
 
     @Override
