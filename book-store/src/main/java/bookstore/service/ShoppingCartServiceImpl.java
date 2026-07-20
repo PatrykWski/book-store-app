@@ -35,7 +35,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
                 () -> new UsernameNotFoundException("User with email: " + email
                         + " doesn't exist"));
 
-        ShoppingCart shoppingCart = getOrCreateShoppingCart(user);
+        ShoppingCart shoppingCart = shoppingCartRepository.getShoppingCartByUserId(user.getId());
 
         Book book = bookRepository.findById(addBookRequestDto.getBookId()).orElseThrow(
                 () -> new EntityNotFoundException(
@@ -62,26 +62,21 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     @Override
     @Transactional(readOnly = true)
     public ShoppingCartResponseDto showACart(String email) {
-        User user = userRepository.findByEmail(email).orElseThrow(
-                () -> new EntityNotFoundException("User with email: " + email + " doesn't exist"));
-        ShoppingCart shoppingCart = getOrCreateShoppingCart(user);
+        User user = getUserByEmail(email);
+
+        ShoppingCart shoppingCart = shoppingCartRepository.getShoppingCartByUserId(user.getId());
         return shoppingCartMapper.toDto(shoppingCart);
     }
 
     @Override
     @Transactional
     public ShoppingCartResponseDto deleteABookFromTheCart(String email, Long cartItemId) {
-        User user = userRepository.findByEmail(email).orElseThrow(
-                () -> new UsernameNotFoundException("User with email: " + email
-                        + " doesn't exist"));
-        ShoppingCart shoppingCart = getOrCreateShoppingCart(user);
+        User user = getUserByEmail(email);
 
-        CartItem cartItem = shoppingCart.getCartItems().stream()
-                .filter(cartItem1 -> cartItem1.getId().equals(cartItemId))
-                .findFirst()
-                .orElseThrow(
-                        () -> new EntityNotFoundException("CartItem with id: " + cartItemId
-                                + " doesn't exist"));
+        ShoppingCart shoppingCart = shoppingCartRepository.getShoppingCartByUserId(user.getId());
+
+        CartItem cartItem = getCartItem(shoppingCart, cartItemId);
+
         shoppingCart.getCartItems().remove(cartItem);
 
         return shoppingCartMapper.toDto(shoppingCart);
@@ -92,29 +87,29 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     public ShoppingCartResponseDto updateABookInTheCart(
             String email, Long cartItemId,
             UpdateShoppingCartQuantityDto updateShoppingCartQuantityDto) {
-        User user = userRepository.findByEmail(email).orElseThrow(
-                () -> new EntityNotFoundException("User with email: " + email + " doesn't exist"));
 
-        ShoppingCart shoppingCart = getOrCreateShoppingCart(user);
+        User user = getUserByEmail(email);
 
-        CartItem cartItem = shoppingCart.getCartItems().stream()
-                .filter(item -> item.getId().equals(cartItemId))
-                .findFirst()
-                .orElseThrow(
-                        () -> new EntityNotFoundException("CartItem with id: " + cartItemId
-                                + " doesn't exist"));
+        ShoppingCart shoppingCart = shoppingCartRepository.getShoppingCartByUserId(user.getId());
+
+        CartItem cartItem = getCartItem(shoppingCart, cartItemId);
 
         cartItem.setQuantity(updateShoppingCartQuantityDto.quantity());
 
         return shoppingCartMapper.toDto(shoppingCart);
     }
 
-    private ShoppingCart getOrCreateShoppingCart(User user) {
-        return shoppingCartRepository.getShoppingCartByUserId(user.getId()).orElseGet(
-                () -> {
-                    ShoppingCart shoppingCart = new ShoppingCart();
-                    shoppingCart.setUser(user);
-                    return shoppingCartRepository.save(shoppingCart);
-                });
+    private User getUserByEmail(String email) {
+        return userRepository.findByEmail(email).orElseThrow(
+                () -> new EntityNotFoundException("User with email: " + email + " doesn't exist"));
+    }
+
+    private CartItem getCartItem(ShoppingCart shoppingCart, Long cartItemId) {
+        return shoppingCart.getCartItems().stream()
+                .filter(item -> item.getId().equals(cartItemId))
+                .findFirst()
+                .orElseThrow(
+                        () -> new EntityNotFoundException("CartItem with id: " + cartItemId
+                                + " doesn't exist"));
     }
 }
