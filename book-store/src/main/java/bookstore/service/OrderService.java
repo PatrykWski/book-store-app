@@ -6,7 +6,6 @@ import bookstore.dto.order.UpdateOrderStatusDto;
 import bookstore.dto.orderitem.OrderItemResponseDto;
 import java.nio.file.AccessDeniedException;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 public interface OrderService {
@@ -17,7 +16,7 @@ public interface OrderService {
     Set<OrderItemResponseDto> getOrderItems(
             String email, Long orderId) throws AccessDeniedException;
 
-    Optional<OrderItemResponseDto> getOrderItemById(String email, Long bookId);
+    OrderItemResponseDto getOrderItemById(String email, Long bookId);
 
     OrderResponseDto updateOrderStatus(Long orderId, UpdateOrderStatusDto statusDto);
 }

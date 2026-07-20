@@ -72,6 +72,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<OrderResponseDto> viewHistory(String email) {
         User user = userRepository.findByEmail(email).orElseThrow(
                 () -> new EntityNotFoundException("User with email: " + email + " doesn't exist"));
@@ -84,6 +85,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Set<OrderItemResponseDto> getOrderItems(
             String email, Long orderId) throws AccessDeniedException {
         User user = userRepository.findByEmail(email).orElseThrow(
@@ -100,20 +102,26 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Optional<OrderItemResponseDto> getOrderItemById(String email, Long bookId) {
+    @Transactional(readOnly = true)
+    public OrderItemResponseDto getOrderItemById(String email, Long bookId) {
         User user = userRepository.findByEmail(email).orElseThrow(
                 () -> new EntityNotFoundException("User with email: " + email + " doesn't exist"));
 
         Order order = orderRepository.getOrderByUser(user);
 
-        return order.getOrderItems().stream()
+        Optional<OrderItem> foundItem = order.getOrderItems().stream()
                 .filter(orderItem -> orderItem.getBook().getId().equals(bookId))
-                .map(orderItemMapper::toItemResponseDto)
                 .findFirst();
 
+        if (foundItem.isPresent()) {
+            return orderItemMapper.toItemResponseDto(foundItem.get());
+        }
+
+        throw new EntityNotFoundException("Book with id: " + bookId + " doesn't exist");
     }
 
     @Override
+    @Transactional
     public OrderResponseDto updateOrderStatus(Long orderId, UpdateOrderStatusDto statusDto) {
 
         Order order = orderRepository.getOrderById(orderId);
