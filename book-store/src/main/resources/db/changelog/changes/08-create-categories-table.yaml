@@ -18,8 +18,12 @@ databaseChangeLog:
                   type: varchar(255)
                   constraints:
                     nullable: false
+                    unique: true
               - column:
                   name: is_deleted
-                  type: boolean
+                  type: BIT
                   constraints:
                     nullable: false
+              - column:
+                  name: description
+                  type: varchar(255)

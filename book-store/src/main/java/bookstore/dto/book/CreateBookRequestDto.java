@@ -1,8 +1,10 @@
 package bookstore.dto.book;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.PositiveOrZero;
 import java.math.BigDecimal;
+import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -19,4 +21,6 @@ public class CreateBookRequestDto {
     private BigDecimal price;
     private String description;
     private String coverImage;
+    @NotEmpty
+    private Set<Long> categoryIds;
 }

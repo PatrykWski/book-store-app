@@ -17,7 +17,3 @@ databaseChangeLog:
       file: db/changelog/changes/08-create-categories-table.yaml
   - include:
       file: db/changelog/changes/09-create-books-categories-table.yaml
-  - include:
-      file: db/changelog/changes/10-add-description-column-to-categories.yaml
-  - include:
-      file: db/changelog/changes/11-change-boolean-into-bit-in-categories.yaml
