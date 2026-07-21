@@ -1,7 +1,7 @@
 package bookstore.dto.order;
 
 import bookstore.model.Status;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
-public record UpdateOrderStatusDto(@NotBlank Status status) {
+public record UpdateOrderStatusDto(@NotNull Status status) {
 }

@@ -4,9 +4,9 @@ import bookstore.dto.order.OrderResponseDto;
 import bookstore.dto.order.PlacingOrderRequestDto;
 import bookstore.dto.order.UpdateOrderStatusDto;
 import bookstore.dto.orderitem.OrderItemResponseDto;
-import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.Set;
+import org.springframework.security.access.AccessDeniedException;
 
 public interface OrderService {
     OrderResponseDto placeOrder(String email, PlacingOrderRequestDto requestDto);
@@ -16,7 +16,7 @@ public interface OrderService {
     Set<OrderItemResponseDto> getOrderItems(
             String email, Long orderId) throws AccessDeniedException;
 
-    OrderItemResponseDto getOrderItemById(String email, Long bookId);
+    OrderItemResponseDto getOrderItemById(String email, Long itemId, Long orderId);
 
     OrderResponseDto updateOrderStatus(Long orderId, UpdateOrderStatusDto statusDto);
 }

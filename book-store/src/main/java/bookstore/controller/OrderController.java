@@ -8,11 +8,11 @@ import bookstore.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -47,7 +47,7 @@ public class OrderController {
         return orderService.viewHistory(email);
     }
 
-    @GetMapping("/{orderId}")
+    @GetMapping("/{orderId}/items")
     @Operation(summary = "Get all order items", description = "Get all order items")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public Set<OrderItemResponseDto> getOrderItems(
@@ -56,12 +56,13 @@ public class OrderController {
         return orderService.getOrderItems(email, orderId);
     }
 
-    @GetMapping("/{bookId}")
+    @GetMapping("/{orderId}/items/{itemId}")
     @Operation(summary = "Get an item", description = "Get an item by ID")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public OrderItemResponseDto getOrderItemById(@AuthenticationPrincipal String email,
-                                                 @PathVariable Long bookId) {
-        return orderService.getOrderItemById(email, bookId);
+                                                 @PathVariable Long itemId,
+                                                 @PathVariable Long orderId) {
+        return orderService.getOrderItemById(email, itemId, orderId);
     }
 
     @PatchMapping("/{orderId}")
