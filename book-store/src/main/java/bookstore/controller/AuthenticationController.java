@@ -2,6 +2,7 @@ package bookstore.controller;
 
 import bookstore.dto.user.RegisterRequestDto;
 import bookstore.dto.user.UserLoginRequestDto;
+import bookstore.dto.user.UserLoginResponseDto;
 import bookstore.dto.user.UserResponseDto;
 import bookstore.security.AuthenticationService;
 import bookstore.service.UserService;
@@ -33,7 +34,7 @@ public class AuthenticationController {
 
     @PostMapping("/login")
     @Operation(summary = "Log in", description = "Authenticates a user using their credentials")
-    public UserResponseDto login(@Valid @RequestBody UserLoginRequestDto requestDto) {
+    public UserLoginResponseDto login(@Valid @RequestBody UserLoginRequestDto requestDto) {
         return authenticationService.authenticate(requestDto);
     }
 }

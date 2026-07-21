@@ -1,36 +1,35 @@
 package bookstore.security;
 
 import bookstore.dto.user.UserLoginRequestDto;
-import bookstore.dto.user.UserResponseDto;
-import bookstore.exception.EntityNotFoundException;
+import bookstore.dto.user.UserLoginResponseDto;
 import bookstore.exception.LoginException;
-import bookstore.mapper.UserMapper;
 import bookstore.model.User;
-import bookstore.repository.UserRepository;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
 public class AuthenticationService {
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
-    private final UserMapper userMapper;
+    private final JwtUtil jwtUtil;
+    private final AuthenticationManager authenticationManager;
 
-    public UserResponseDto authenticate(UserLoginRequestDto userLoginRequestDto) {
-        Optional<User> user = userRepository.findByEmail(userLoginRequestDto.getEmail());
-        if (user.isEmpty()) {
-            throw new EntityNotFoundException("A user with this email doesn't exist");
+    public UserLoginResponseDto authenticate(UserLoginRequestDto userLoginRequestDto) {
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            userLoginRequestDto.getEmail(),
+                            userLoginRequestDto.getPassword()
+                    )
+            );
+            User user = (User) authentication.getPrincipal();
+            String jwtToken = jwtUtil.generateToken(user);
+            return new UserLoginResponseDto(jwtToken);
+        } catch (AuthenticationException ex) {
+            throw new LoginException("Invalid email or password");
         }
-        if (passwordEncoder.matches(userLoginRequestDto.getPassword(),
-                user.get().getPassword())) {
-            return user.stream()
-                    .map(userMapper::toDto)
-                    .findAny()
-                    .get();
-        }
-        throw new LoginException("Incorrect login or password");
     }
 }
