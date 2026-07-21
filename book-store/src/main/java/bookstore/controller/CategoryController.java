@@ -40,7 +40,8 @@ public class CategoryController {
     }
 
     @GetMapping
-    @Operation(summary = "Get categories", description = "Create an list with all categories")
+    @Operation(summary = "Get categories",
+            description = "Retrieve all categories with pagination and sorting")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public Page<CategoryDto> getAll(@ParameterObject @PageableDefault(size = 10, sort = "name")
                                     Pageable pageable) {
@@ -48,14 +49,14 @@ public class CategoryController {
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Get category", description = "Get an category with specific id")
+    @Operation(summary = "Get category", description = "Retrieve a category by its ID")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public CategoryDto getCategoryById(@PathVariable Long id) {
         return categoryService.getById(id);
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Update category", description = "Update an category by id")
+    @Operation(summary = "Update category", description = "Update a category by its ID")
     @PreAuthorize("hasRole('ADMIN')")
     public CategoryDto updateCategory(@PathVariable Long id,
                                       @Valid @RequestBody CategoryRequestDto categoryRequestDto) {
@@ -64,14 +65,15 @@ public class CategoryController {
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}")
-    @Operation(summary = "Delete category", description = "Delete category by id")
+    @Operation(summary = "Delete category", description = "Delete a category by id")
     @PreAuthorize("hasRole('ADMIN')")
     public void deleteCategory(@PathVariable Long id) {
         categoryService.deleteById(id);
     }
 
     @GetMapping("/{id}/books")
-    @Operation(summary = "Get books by category", description = "Get all books by categories id")
+    @Operation(summary = "Get books by category",
+            description = "Retrieve all books assigned to a category")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public Page<BookDtoWithoutCategoryIds> getBooksByCategoryId(
             @PathVariable Long id, @ParameterObject @PageableDefault

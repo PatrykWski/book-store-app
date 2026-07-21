@@ -23,7 +23,7 @@ public interface BookMapper {
     @AfterMapping
     default void setCategoryIds(@MappingTarget BookDto bookDto, Book book) {
         if (book.getCategories() != null) {
-            bookDto.setCategoryId(book.getCategories().stream()
+            bookDto.setCategoryIds(book.getCategories().stream()
                     .map(Category::getId)
                     .collect(Collectors.toSet()));
         }
