@@ -3,7 +3,7 @@ package bookstore.service;
 import bookstore.dto.cartitem.AddBookRequestDto;
 import bookstore.dto.shoppingcart.ShoppingCartResponseDto;
 import bookstore.dto.shoppingcart.UpdateShoppingCartQuantityDto;
-import bookstore.exception.CartItemFoundException;
+import bookstore.exception.CartItemAlreadyExistsException;
 import bookstore.exception.EntityNotFoundException;
 import bookstore.mapper.ShoppingCartMapper;
 import bookstore.model.Book;
@@ -15,7 +15,6 @@ import bookstore.repository.ShoppingCartRepository;
 import bookstore.repository.UserRepository;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,11 +30,9 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     @Transactional
     public ShoppingCartResponseDto addABookToACart(String email,
                                                    AddBookRequestDto addBookRequestDto) {
-        User user = userRepository.findByEmail(email).orElseThrow(
-                () -> new UsernameNotFoundException("User with email: " + email
-                        + " doesn't exist"));
+        User user = getUserByEmail(email);
 
-        ShoppingCart shoppingCart = shoppingCartRepository.getShoppingCartByUserId(user.getId());
+        ShoppingCart shoppingCart = getShoppingCart(user);
 
         Book book = bookRepository.findById(addBookRequestDto.getBookId()).orElseThrow(
                 () -> new EntityNotFoundException(
@@ -47,7 +44,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
                 .findFirst();
 
         if (existingItem.isPresent()) {
-            throw new CartItemFoundException("Book already in the cart,"
+            throw new CartItemAlreadyExistsException("Book already in the cart,"
                     + " use update option to change details of the cart item");
         } else {
             CartItem cartItem = new CartItem();
@@ -64,7 +61,8 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     public ShoppingCartResponseDto showACart(String email) {
         User user = getUserByEmail(email);
 
-        ShoppingCart shoppingCart = shoppingCartRepository.getShoppingCartByUserId(user.getId());
+        ShoppingCart shoppingCart = getShoppingCart(user);
+
         return shoppingCartMapper.toDto(shoppingCart);
     }
 
@@ -73,7 +71,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     public ShoppingCartResponseDto deleteABookFromTheCart(String email, Long cartItemId) {
         User user = getUserByEmail(email);
 
-        ShoppingCart shoppingCart = shoppingCartRepository.getShoppingCartByUserId(user.getId());
+        ShoppingCart shoppingCart = getShoppingCart(user);
 
         CartItem cartItem = getCartItem(shoppingCart, cartItemId);
 
@@ -90,7 +88,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
 
         User user = getUserByEmail(email);
 
-        ShoppingCart shoppingCart = shoppingCartRepository.getShoppingCartByUserId(user.getId());
+        ShoppingCart shoppingCart = getShoppingCart(user);
 
         CartItem cartItem = getCartItem(shoppingCart, cartItemId);
 
@@ -111,5 +109,11 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
                 .orElseThrow(
                         () -> new EntityNotFoundException("CartItem with id: " + cartItemId
                                 + " doesn't exist"));
+    }
+
+    private ShoppingCart getShoppingCart(User user) {
+        return shoppingCartRepository.getShoppingCartByUserId(user.getId())
+                .orElseThrow(() -> new EntityNotFoundException("Shopping cart for user: "
+                        + user + " doesn't exist"));
     }
 }
