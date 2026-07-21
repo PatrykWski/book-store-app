@@ -76,7 +76,6 @@ public class BookServiceImpl implements BookService {
     @Transactional
     @Override
     public void deleteBookById(Long id) {
-        Book book = getBookById(id);
         bookRepository.deleteById(id);
     }
 
