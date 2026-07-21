@@ -1,6 +1,6 @@
 package bookstore.exception;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -29,7 +29,7 @@ public class CustomGlobalExceptionHandler extends ResponseEntityExceptionHandler
                 .toList();
 
         ErrorResponse errorResponse = new ErrorResponse(
-                LocalDateTime.now(),
+                Instant.now(),
                 HttpStatus.BAD_REQUEST.value(),
                 "Validation Failed",
                 mappedErrors
@@ -50,7 +50,7 @@ public class CustomGlobalExceptionHandler extends ResponseEntityExceptionHandler
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<Object> handleEntityNotFound(EntityNotFoundException ex) {
         ErrorResponse errorResponse = new ErrorResponse(
-                LocalDateTime.now(),
+                Instant.now(),
                 HttpStatus.NOT_FOUND.value(),
                 "Not found",
                 List.of(ex.getMessage())
@@ -62,7 +62,7 @@ public class CustomGlobalExceptionHandler extends ResponseEntityExceptionHandler
     @ExceptionHandler(RegistrationException.class)
     public ResponseEntity<Object> handleRegistrationNotValid(RegistrationException ex) {
         ErrorResponse errorResponse = new ErrorResponse(
-                LocalDateTime.now(),
+                Instant.now(),
                 HttpStatus.CONFLICT.value(),
                 "Registration request not valid",
                 List.of(ex.getMessage())
@@ -73,7 +73,7 @@ public class CustomGlobalExceptionHandler extends ResponseEntityExceptionHandler
     @ExceptionHandler(CartItemAlreadyExistsException.class)
     public ResponseEntity<Object> handleCartItemFoundException(CartItemAlreadyExistsException ex) {
         ErrorResponse errorResponse = new ErrorResponse(
-                LocalDateTime.now(),
+                Instant.now(),
                 HttpStatus.CONFLICT.value(),
                 "Conflict",
                 List.of(ex.getMessage())

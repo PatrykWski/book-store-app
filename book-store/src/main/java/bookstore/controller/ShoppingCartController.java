@@ -33,7 +33,7 @@ public class ShoppingCartController {
     @Operation(summary = "Add a book to a cart",
             description = "Adds a selected book and quantity to the authenticated user's cart")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-    public ShoppingCartResponseDto addABookToACart(
+    public ShoppingCartResponseDto addCartItem(
             @AuthenticationPrincipal String userEmail,
             @Valid @RequestBody AddBookRequestDto addBookRequestDto) {
         return shoppingCartService.addABookToACart(userEmail, addBookRequestDto);
@@ -42,7 +42,7 @@ public class ShoppingCartController {
     @GetMapping
     @Operation(summary = "Show a cart", description = "Show users cart")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-    public ShoppingCartResponseDto showACart(@AuthenticationPrincipal String userEmail) {
+    public ShoppingCartResponseDto getCart(@AuthenticationPrincipal String userEmail) {
         return shoppingCartService.showACart(userEmail);
     }
 
@@ -50,7 +50,8 @@ public class ShoppingCartController {
     @Operation(summary = "Delete a book from the cart",
             description = "Delete a book from the cart")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-    public ShoppingCartResponseDto deleteABook(
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public ShoppingCartResponseDto deleteCartItem(
             @AuthenticationPrincipal String userEmail, @PathVariable Long cartItemId) {
         return shoppingCartService.deleteABookFromTheCart(userEmail, cartItemId);
     }
@@ -58,7 +59,7 @@ public class ShoppingCartController {
     @PutMapping("/cart-items/{cartItemId}")
     @Operation(summary = "Update a book", description = "Update a book in the cart")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-    public ShoppingCartResponseDto updateABookInTheCart(
+    public ShoppingCartResponseDto updateCartItem(
             @AuthenticationPrincipal String userEmail,
             @PathVariable Long cartItemId,
             @Valid @RequestBody UpdateShoppingCartQuantityDto updateShoppingCartQuantityDto) {

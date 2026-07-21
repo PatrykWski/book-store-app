@@ -113,7 +113,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
 
     private ShoppingCart getShoppingCart(User user) {
         return shoppingCartRepository.getShoppingCartByUserId(user.getId())
-                .orElseThrow(() -> new EntityNotFoundException("Shopping cart for user: "
-                        + user + " doesn't exist"));
+                .orElseThrow(() -> new EntityNotFoundException("Shopping cart for : "
+                        + user.getUsername() + " doesn't exist"));
     }
 }
