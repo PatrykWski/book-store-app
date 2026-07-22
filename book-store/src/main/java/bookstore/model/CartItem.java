@@ -9,6 +9,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Min;
 import java.util.Objects;
 import lombok.Getter;
 import lombok.Setter;
@@ -28,19 +29,29 @@ public class CartItem {
     @JoinColumn(name = "book_id", nullable = false)
     private Book book;
     @Column(nullable = false)
+    @Min(1)
     private int quantity;
 
     @Override
     public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
+
         CartItem cartItem = (CartItem) o;
+        if (id == null || cartItem.id == null) {
+            return false;
+        }
+
         return Objects.equals(id, cartItem.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(id);
+        return getClass().hashCode();
     }
 }

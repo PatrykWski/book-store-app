@@ -1,16 +1,15 @@
 package bookstore.dto.cartitem;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
 public class AddBookRequestDto {
-    @NotBlank
+    @NotNull
     private Long bookId;
-    @NotBlank
-    @Size(min = 1)
+    @Positive
     private int quantity;
 }

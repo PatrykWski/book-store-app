@@ -1,10 +1,10 @@
 package bookstore.exception;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 public record ErrorResponse(
-        LocalDateTime timestamp,
+        Instant timestamp,
         int status,
         String error,
         List<String> messages

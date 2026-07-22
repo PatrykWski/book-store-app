@@ -39,7 +39,7 @@ public class OrderServiceImpl implements OrderService {
     public OrderResponseDto placeOrder(String email, PlacingOrderRequestDto requestDto) {
         User user = findUserByEmail(email);
 
-        ShoppingCart shoppingCart = shoppingCartRepository.getShoppingCartByUserId(user.getId())
+        ShoppingCart shoppingCart = shoppingCartRepository.findShoppingCartByUserId(user.getId())
                 .orElseThrow(
                         () -> new EntityNotFoundException("Shopping cart doesn't exist"));
 
