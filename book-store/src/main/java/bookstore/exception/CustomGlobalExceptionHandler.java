@@ -71,7 +71,8 @@ public class CustomGlobalExceptionHandler extends ResponseEntityExceptionHandler
     }
 
     @ExceptionHandler(CartItemAlreadyExistsException.class)
-    public ResponseEntity<Object> handleCartItemFoundException(CartItemAlreadyExistsException ex) {
+    public ResponseEntity<Object> handleCartItemAlreadyExistsException(
+            CartItemAlreadyExistsException ex) {
         ErrorResponse errorResponse = new ErrorResponse(
                 Instant.now(),
                 HttpStatus.CONFLICT.value(),

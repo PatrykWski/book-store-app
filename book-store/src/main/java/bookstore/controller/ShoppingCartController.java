@@ -50,7 +50,6 @@ public class ShoppingCartController {
     @Operation(summary = "Delete a book from the cart",
             description = "Delete a book from the cart")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
     public ShoppingCartResponseDto deleteCartItem(
             @AuthenticationPrincipal String userEmail, @PathVariable Long cartItemId) {
         return shoppingCartService.deleteABookFromTheCart(userEmail, cartItemId);
