@@ -1,38 +1,39 @@
-version: '3.8'
+version: "3.8"
 
 services:
+  mysql:
+    platform: linux/arm64
+    image: mysql:8.0
+    restart: unless-stopped
+    env_file: ./.env
+    environment:
+      - MYSQL_USER=$MYSQL_USER
+      - MYSQL_PASSWORD=$MYSQL_PASSWORD
+      - MYSQL_DATABASE=$MYSQL_DATABASE
+    ports:
+      - "$MYSQL_LOCAL_PORT:$MYSQL_DOCKER_PORT"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
   app:
-    build: .
-    container_name: bookstore-app
-    ports:
-      - "8080:8080"
-    environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/bookstore
-      - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=postgres
-      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
     depends_on:
-      - db
-    networks:
-      - bookstore-net
-
-  db:
-    image: postgres:15-alpine
-    container_name: bookstore-db
-    environment:
-      - POSTGRES_DB=bookstore
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+      mysql:
+        condition: service_healthy
+    restart: on-failure
+    image: posts-service
+    build: .
+    env_file: ./.env
     ports:
-      - "5432:5432"
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    networks:
-      - bookstore-net
-
-volumes:
-  pgdata:
-
-networks:
-  bookstore-net:
-    driver: bridge
+      - "$SPRING_LOCAL_PORT:$SPRING_DOCKER_PORT"
+      - "$DEBUG_PORT:$DEBUG_PORT"
+    environment:
+      SPRING_APPLICATION_JSON: '{
+        "spring.datasource.url" : "jdbc:mysql://mysql:$MYSQL_DOCKER_PORT/$MYSQL_DATABASE",
+        "spring.datasource.username" : "$MYSQL_USER",
+        "spring.datasource.password" : "$MYSQL_PASSWORD",
+        "spring.jpa.properties.hibernate.dialect" : "org.hibernate.dialect.MySQLDialect"
+      }'
+      JAVA_TOOL_OPTIONS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
