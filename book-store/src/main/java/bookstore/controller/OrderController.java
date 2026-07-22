@@ -60,16 +60,16 @@ public class OrderController {
     @Operation(summary = "Get an item", description = "Get an item by ID")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public OrderItemResponseDto getOrderItemById(@AuthenticationPrincipal String email,
-                                                 @PathVariable Long itemId,
-                                                 @PathVariable Long orderId) {
-        return orderService.getOrderItemById(email, itemId, orderId);
+                                                 @PathVariable Long orderId,
+                                                 @PathVariable Long itemId) {
+        return orderService.findOrderItemByOrderIdAndItemId(email, orderId, itemId);
     }
 
     @PatchMapping("/{orderId}")
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Update an order", description = "Update an order by status using ID")
     public OrderResponseDto updateOrderStatus(@PathVariable Long orderId,
-                                              @RequestBody UpdateOrderStatusDto statusDto) {
+                                              @Valid @RequestBody UpdateOrderStatusDto statusDto) {
         return orderService.updateOrderStatus(orderId, statusDto);
     }
 }
