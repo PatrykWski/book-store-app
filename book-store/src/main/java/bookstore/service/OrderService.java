@@ -16,7 +16,7 @@ public interface OrderService {
     Set<OrderItemResponseDto> getOrderItems(
             String email, Long orderId) throws AccessDeniedException;
 
-    OrderItemResponseDto getOrderItemById(String email, Long itemId, Long orderId);
+    OrderItemResponseDto findOrderItemByOrderIdAndItemId(String email, Long orderId, Long itemId);
 
     OrderResponseDto updateOrderStatus(Long orderId, UpdateOrderStatusDto statusDto);
 }

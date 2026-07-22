@@ -1,12 +1,12 @@
 package bookstore.exception;
 
-import java.nio.file.AccessDeniedException;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -30,7 +30,7 @@ public class CustomGlobalExceptionHandler extends ResponseEntityExceptionHandler
                 .toList();
 
         ErrorResponse errorResponse = new ErrorResponse(
-                LocalDateTime.now(),
+                Instant.now(),
                 HttpStatus.BAD_REQUEST.value(),
                 "Validation Failed",
                 mappedErrors
@@ -51,7 +51,7 @@ public class CustomGlobalExceptionHandler extends ResponseEntityExceptionHandler
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<Object> handleEntityNotFound(EntityNotFoundException ex) {
         ErrorResponse errorResponse = new ErrorResponse(
-                LocalDateTime.now(),
+                Instant.now(),
                 HttpStatus.NOT_FOUND.value(),
                 "Not found",
                 List.of(ex.getMessage())
@@ -63,7 +63,7 @@ public class CustomGlobalExceptionHandler extends ResponseEntityExceptionHandler
     @ExceptionHandler(RegistrationException.class)
     public ResponseEntity<Object> handleRegistrationNotValid(RegistrationException ex) {
         ErrorResponse errorResponse = new ErrorResponse(
-                LocalDateTime.now(),
+                Instant.now(),
                 HttpStatus.CONFLICT.value(),
                 "Registration request not valid",
                 List.of(ex.getMessage())
@@ -71,10 +71,11 @@ public class CustomGlobalExceptionHandler extends ResponseEntityExceptionHandler
         return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
     }
 
-    @ExceptionHandler(CartItemFoundException.class)
-    public ResponseEntity<Object> handleCartItemFoundException(CartItemFoundException ex) {
+    @ExceptionHandler(CartItemAlreadyExistsException.class)
+    public ResponseEntity<Object> handleCartItemAlreadyExistsException(
+            CartItemAlreadyExistsException ex) {
         ErrorResponse errorResponse = new ErrorResponse(
-                LocalDateTime.now(),
+                Instant.now(),
                 HttpStatus.CONFLICT.value(),
                 "Conflict",
                 List.of(ex.getMessage())
@@ -85,7 +86,7 @@ public class CustomGlobalExceptionHandler extends ResponseEntityExceptionHandler
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<Object> handleAccesDeniedException(AccessDeniedException ex) {
         ErrorResponse errorResponse = new ErrorResponse(
-                LocalDateTime.now(),
+                Instant.now(),
                 HttpStatus.FORBIDDEN.value(),
                 "Forbidden",
                 List.of(ex.getMessage())

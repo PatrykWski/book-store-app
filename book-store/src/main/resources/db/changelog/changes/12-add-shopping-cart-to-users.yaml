@@ -1,0 +1,17 @@
+databaseChangeLog:
+  - changeSet:
+      author: Patryk
+      id: add-shopping-cart-to-users
+      changes:
+        - insert:
+            tableName: shopping_carts
+            columns:
+              - column:
+                  name: user_id
+                  valueNumeric: 1
+        - insert:
+            tableName: shopping_carts
+            columns:
+              - column:
+                  name: user_id
+                  valueNumeric: 2

@@ -11,7 +11,6 @@ import bookstore.model.OrderItem;
 import bookstore.model.ShoppingCart;
 import bookstore.model.Status;
 import bookstore.model.User;
-import bookstore.repository.OrderItemRepository;
 import bookstore.repository.OrderRepository;
 import bookstore.repository.ShoppingCartRepository;
 import bookstore.repository.UserRepository;
@@ -33,7 +32,6 @@ public class OrderServiceImpl implements OrderService {
     private final UserRepository userRepository;
     private final ShoppingCartRepository shoppingCartRepository;
     private final OrderItemMapper orderItemMapper;
-    private final OrderItemRepository orderItemRepository;
     private final OrderRepository orderRepository;
 
     @Override
@@ -41,7 +39,7 @@ public class OrderServiceImpl implements OrderService {
     public OrderResponseDto placeOrder(String email, PlacingOrderRequestDto requestDto) {
         User user = findUserByEmail(email);
 
-        ShoppingCart shoppingCart = shoppingCartRepository.getShoppingCartByUserId(user.getId())
+        ShoppingCart shoppingCart = shoppingCartRepository.findShoppingCartByUserId(user.getId())
                 .orElseThrow(
                         () -> new EntityNotFoundException("Shopping cart doesn't exist"));
 
@@ -63,14 +61,13 @@ public class OrderServiceImpl implements OrderService {
         order.setTotal(finalPrice);
         order.setOrderItems(new HashSet<>());
 
-        Order savedOrder = orderRepository.save(order);
-
         for (OrderItem orderItem : orderItems) {
-            orderItem.setOrder(savedOrder);
+            orderItem.setOrder(order);
         }
 
-        orderItemRepository.saveAll(orderItems);
-        savedOrder.setOrderItems(orderItems);
+        order.setOrderItems(orderItems);
+
+        Order savedOrder = orderRepository.save(order);
 
         shoppingCart.setCartItems(new HashSet<>());
 
@@ -109,15 +106,18 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional(readOnly = true)
-    public OrderItemResponseDto getOrderItemById(String email, Long itemId, Long orderId) {
+    public OrderItemResponseDto findOrderItemByOrderIdAndItemId(
+            String email, Long orderId, Long itemId) {
 
-        Optional<OrderItem> foundItem = orderRepository.findByIdAndOrderItemsId(itemId, orderId);
+        Optional<OrderItem> foundItem = orderRepository.findOrderItemByOrderIdAndItemId(
+                orderId, itemId);
 
         if (foundItem.isPresent()) {
             return orderItemMapper.toItemResponseDto(foundItem.get());
         }
 
-        throw new EntityNotFoundException("Book with id: " + itemId + " doesn't exist");
+        throw new EntityNotFoundException("Order item with id: " + itemId
+                + " doesn't exist in order with id: " + orderId);
     }
 
     @Override

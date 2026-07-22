@@ -17,3 +17,6 @@ databaseChangeLog:
                   type: bigint
                   constraints:
                     nullable: false
+                    unique: true
+                    foreignKeyName: fk_shopping_cart_user
+                    references: users(id)
