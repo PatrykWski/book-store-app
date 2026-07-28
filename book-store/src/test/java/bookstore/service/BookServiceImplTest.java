@@ -1,6 +1,13 @@
 package bookstore.service;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import bookstore.dto.book.BookDto;
+import bookstore.dto.book.BookSearchParametersDto;
 import bookstore.dto.book.CreateBookRequestDto;
 import bookstore.exception.EntityNotFoundException;
 import bookstore.mapper.BookMapper;
@@ -8,6 +15,7 @@ import bookstore.model.Book;
 import bookstore.model.Category;
 import bookstore.repository.BookRepository;
 import bookstore.repository.CategoryRepository;
+import bookstore.repository.specification.BookSpecificationBuilder;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -19,18 +27,17 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 
 @ExtendWith(MockitoExtension.class)
 public class BookServiceImplTest {
 
-    private static final Long ID_NR_1 = 1L;
+    private static final Long VALID_ID = 1L;
+    private static final Long INVALID_ID = 99L;
 
     @Mock
     private BookRepository bookRepository;
@@ -40,6 +47,9 @@ public class BookServiceImplTest {
 
     @Mock
     private BookMapper bookMapper;
+
+    @Mock
+    private BookSpecificationBuilder bookSpecificationBuilder;
 
     @InjectMocks
     private BookServiceImpl bookService;
@@ -104,7 +114,7 @@ public class BookServiceImplTest {
     public void findById_BookDoesNotExist_ThrowsEntityNotFoundException() {
         //given
 
-        Long nonExistingId = ID_NR_1;
+        Long nonExistingId = VALID_ID;
 
         when(bookRepository.findById(nonExistingId)).thenReturn(Optional.empty());
 
@@ -144,7 +154,6 @@ public class BookServiceImplTest {
         updatedBook.setCategories(categories);
         BookDto expected = createValidBookDto();
 
-
         when(bookRepository.findById(book.getId())).thenReturn(Optional.of(book));
         when(bookMapper.updateBook(book, createBookRequestDto)).thenReturn(updatedBook);
         when(categoryRepository.findAllById(createValidLongSet())).thenReturn(
@@ -165,12 +174,12 @@ public class BookServiceImplTest {
     public void updateBookById_BookDoesNotExist_ThrowEntityNotFoundException() {
         //given
         CreateBookRequestDto createBookRequestDto = createValidBookRequestDto();
-        when(bookRepository.findById(ID_NR_1)).thenReturn(Optional.empty());
+        when(bookRepository.findById(VALID_ID)).thenReturn(Optional.empty());
 
         //when & then
 
         Assertions.assertThrows(EntityNotFoundException.class,
-                () -> bookService.updateBookById(ID_NR_1, createBookRequestDto));
+                () -> bookService.updateBookById(VALID_ID, createBookRequestDto));
     }
 
     @Test
@@ -189,19 +198,103 @@ public class BookServiceImplTest {
         //when & then
 
         Assertions.assertThrows(EntityNotFoundException.class,
-                () -> bookService.updateBookById(ID_NR_1, createBookRequestDto));
+                () -> bookService.updateBookById(VALID_ID, createBookRequestDto));
     }
 
     @Test
     public void deleteBookById_ValidId_DeletesSuccessfully() {
         //given
-        Long bookId = ID_NR_1;
+        when(bookRepository.existsById(VALID_ID)).thenReturn(true);
 
         //when
-        bookService.deleteBookById(bookId);
+        bookService.deleteBookById(VALID_ID);
 
         //then
-        verify(bookRepository, times(1)).deleteById(bookId);
+        verify(bookRepository, times(1)).existsById(VALID_ID);
+        verify(bookRepository, times(1)).deleteById(VALID_ID);
+    }
+
+    @Test
+    public void deleteBookById_InvalidId_ReturnsNotFound() {
+        //given
+        when(bookRepository.existsById(INVALID_ID)).thenReturn(false);
+
+        //when & then
+        Assertions.assertThrows(EntityNotFoundException.class,
+                () -> bookService.deleteBookById(INVALID_ID));
+
+        verify(bookRepository, times(1)).existsById(INVALID_ID);
+        verify(bookRepository, never()).deleteById(INVALID_ID);
+    }
+
+    @Test
+    public void search_ValidRequestParamsDto_ReturnsPage() {
+        //given
+        BookSearchParametersDto bookSearchParametersDto = createValidSearchParametersDto();
+        Pageable pageable = Pageable.ofSize(20);
+        Book book = new Book();
+        Page<Book> page = new PageImpl<>(List.of(book));
+        BookDto bookDto = createValidBookDto();
+        Specification<Book> spec = mock(Specification.class);
+
+        when(bookSpecificationBuilder.create(bookSearchParametersDto)).thenReturn(spec);
+        when(bookRepository.findAll(spec, pageable)).thenReturn(page);
+        when(bookMapper.toDto(book)).thenReturn(bookDto);
+
+        //when
+        Page<BookDto> result = bookService.search(bookSearchParametersDto, pageable);
+
+        //then
+        Assertions.assertEquals(1, result.getContent().size());
+        verify(bookSpecificationBuilder).create(bookSearchParametersDto);
+        verify(bookRepository).findAll(spec,pageable);
+    }
+
+    @Test
+    public void search_EmptyRequestParamsDto_ReturnsPage() {
+        //given
+        BookSearchParametersDto bookSearchParametersDto = new BookSearchParametersDto();
+        Pageable pageable = Pageable.ofSize(20);
+        Book book = new Book();
+        Page<Book> page = new PageImpl<>(List.of());
+        Specification<Book> spec = mock(Specification.class);
+
+        when(bookSpecificationBuilder.create(bookSearchParametersDto)).thenReturn(spec);
+        when(bookRepository.findAll(spec, pageable)).thenReturn(page);
+
+        //when
+        Page<BookDto> result = bookService.search(bookSearchParametersDto, pageable);
+
+        //then
+        Assertions.assertEquals(0, result.getContent().size());
+        verify(bookSpecificationBuilder).create(bookSearchParametersDto);
+        verify(bookRepository).findAll(spec,pageable);
+    }
+
+    @Test
+    public void search_PartialRequestParamsDto_ReturnsPage() {
+        //given
+        BookSearchParametersDto bookSearchParametersDto = new BookSearchParametersDto();
+        bookSearchParametersDto.setAuthor("Andrzej Sapkowski");
+        Book book = new Book();
+        book.setAuthor("Andrzej Sapkowski");
+        Page<Book> page = new PageImpl<>(List.of(book));
+        Specification<Book> spec = mock(Specification.class);
+        BookDto bookDto = new BookDto();
+        bookDto.setAuthor("Andrzej Sapkowski");
+        Pageable pageable = Pageable.ofSize(20);
+
+        when(bookSpecificationBuilder.create(bookSearchParametersDto)).thenReturn(spec);
+        when(bookRepository.findAll(spec, pageable)).thenReturn(page);
+        when(bookMapper.toDto(book)).thenReturn(bookDto);
+
+        //when
+        Page<BookDto> result = bookService.search(bookSearchParametersDto, pageable);
+
+        //then
+        Assertions.assertEquals(1, result.getContent().size());
+        verify(bookSpecificationBuilder).create(bookSearchParametersDto);
+        verify(bookRepository).findAll(spec,pageable);
     }
 
     private Book createValidBook() {
@@ -213,6 +306,16 @@ public class BookServiceImplTest {
         book.setTitle("Wiedźmin");
         book.setDescription("A book about monster killer");
         book.setCategories(createValidCategorySet());
+        return book;
+    }
+
+    private BookSearchParametersDto createValidSearchParametersDto() {
+        BookSearchParametersDto book = new BookSearchParametersDto();
+        book.setAuthor("Andrzej Sapkowski");
+        book.setIsbn("978-1-4919-4600-2");
+        book.setTitle("Wiedźmin");
+        book.setMinPrice(new BigDecimal(10));
+        book.setMaxPrice(new BigDecimal(50));
         return book;
     }
 

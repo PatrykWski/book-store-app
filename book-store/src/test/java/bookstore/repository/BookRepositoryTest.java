@@ -22,10 +22,10 @@ public class BookRepositoryTest {
     private BookRepository bookRepository;
 
     @Test
-    @Sql(scripts = "classpath:database/books/add-book-and-category.sql",
-    executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
-    @Sql(scripts = "classpath:database/books/delete-book-and-category.sql",
-    executionPhase = ExecutionPhase.AFTER_TEST_METHOD)
+    @Sql(scripts = "classpath:books/add-book-and-category.sql",
+            executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(scripts = "classpath:books/delete-book-and-category.sql",
+            executionPhase = ExecutionPhase.AFTER_TEST_METHOD)
     void findAllByCategoryId_CategoryExists_ReturnsPageOfBooks() {
         //given
         Pageable pageable = Pageable.ofSize(20);
