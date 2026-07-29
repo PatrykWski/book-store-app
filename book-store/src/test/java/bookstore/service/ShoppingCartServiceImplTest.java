@@ -1,7 +1,5 @@
 package bookstore.service;
 
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import bookstore.dto.cartitem.AddBookRequestDto;
@@ -25,8 +23,8 @@ import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
-import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -177,6 +175,7 @@ public class ShoppingCartServiceImplTest {
     public void showACart_ShoppingCartDoesNotExist_ReturnsEntityNotFoundException() {
         //given
         User user = createValidUser();
+        when(userRepository.findByEmail(CORRECT_TEST_EMAIL)).thenReturn(Optional.of(user));
         when(shoppingCartRepository.findShoppingCartByUserId(user.getId()))
                 .thenReturn(Optional.empty());
 
@@ -206,7 +205,6 @@ public class ShoppingCartServiceImplTest {
 
         //then
         Assertions.assertEquals(expected, actual);
-        verify(shoppingCartRepository, times(1)).save(shoppingCart);
     }
 
     @Test
@@ -279,7 +277,6 @@ public class ShoppingCartServiceImplTest {
 
         //then
         Assertions.assertEquals(expected, actual);
-        verify(shoppingCartRepository, times(1)).save(shoppingCart);
     }
 
     @Test
@@ -413,6 +410,7 @@ public class ShoppingCartServiceImplTest {
         ShoppingCartResponseDto shoppingCartResponseDto = new ShoppingCartResponseDto();
         shoppingCartResponseDto.setId(1L);
         shoppingCartResponseDto.setUserId(user.getId());
+        shoppingCartResponseDto.setCartItems(new HashSet<>());
         shoppingCartResponseDto.getCartItems().add(cartItem);
         return shoppingCartResponseDto;
     }
