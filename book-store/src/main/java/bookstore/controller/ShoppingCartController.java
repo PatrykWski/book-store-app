@@ -46,16 +46,17 @@ public class ShoppingCartController {
         return shoppingCartService.showACart(userEmail);
     }
 
-    @DeleteMapping("/cart-items/{cartItemId}")
+    @DeleteMapping("/cart-items/{itemCartId}")
+    @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Delete a book from the cart",
             description = "Delete a book from the cart")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ShoppingCartResponseDto deleteCartItem(
-            @AuthenticationPrincipal String userEmail, @PathVariable Long cartItemId) {
-        return shoppingCartService.deleteABookFromTheCart(userEmail, cartItemId);
+            @AuthenticationPrincipal String userEmail, @PathVariable Long itemCartId) {
+        return shoppingCartService.deleteABookFromTheCart(userEmail, itemCartId);
     }
 
-    @PutMapping("/cart-items/{cartItemId}")
+    @PutMapping("/cart-item/{cartItemId}")
     @Operation(summary = "Update a book", description = "Update a book in the cart")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ShoppingCartResponseDto updateCartItem(

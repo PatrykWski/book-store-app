@@ -20,11 +20,11 @@ public class AddBookRequestDto {
             return false;
         }
         AddBookRequestDto that = (AddBookRequestDto) o;
-        return Objects.equals(bookId, that.bookId);
+        return quantity == that.quantity && Objects.equals(bookId, that.bookId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(bookId);
+        return Objects.hash(bookId, quantity);
     }
 }
