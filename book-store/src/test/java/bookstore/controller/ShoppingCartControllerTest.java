@@ -1,8 +1,10 @@
 package bookstore.controller;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
-import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -17,32 +19,30 @@ import bookstore.exception.EntityNotFoundException;
 import bookstore.model.Role;
 import bookstore.model.RoleName;
 import bookstore.model.User;
+import bookstore.security.JwtUtil;
+import bookstore.service.CustomUserDetailService;
 import bookstore.service.ShoppingCartService;
 import java.util.HashSet;
 import java.util.Set;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 import tools.jackson.databind.ObjectMapper;
 
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@WebMvcTest(ShoppingCartController.class)
 public class ShoppingCartControllerTest {
-
-    protected static MockMvc mockMvc;
-
     private static final String VALID_USER_EMAIL = "patryk@gmail.com";
     private static final Long VALID_CART_ID = 1L;
     private static final Long INVALID_CART_ID = 2L;
+
+    @Autowired
+    protected MockMvc mockMvc;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -50,14 +50,11 @@ public class ShoppingCartControllerTest {
     @MockitoBean
     private ShoppingCartService shoppingCartService;
 
-    @BeforeAll
-    static void beforeAll(@Autowired
-                          WebApplicationContext applicationContext) {
-        mockMvc = MockMvcBuilders
-                .webAppContextSetup(applicationContext)
-                .apply(springSecurity())
-                .build();
-    }
+    @MockitoBean
+    private JwtUtil jwtUtil;
+
+    @MockitoBean
+    private CustomUserDetailService customUserDetailService;
 
     @Test
     public void addCartItem_ValidRequest_ReturnsShoppingCartResponseDto() throws Exception {
@@ -67,7 +64,8 @@ public class ShoppingCartControllerTest {
         AddBookRequestDto addBookRequestDto = createValidAddBookRequestDto();
         ShoppingCartResponseDto expected = createValidShoppingCartResponseDto(
                 user, cartItemDto);
-        when(shoppingCartService.addABookToACart(VALID_USER_EMAIL, addBookRequestDto))
+        when(shoppingCartService.addABookToACart(nullable(String.class),
+                any(AddBookRequestDto.class)))
                 .thenReturn(expected);
 
         //when
@@ -120,7 +118,7 @@ public class ShoppingCartControllerTest {
         CartItemDto cartItemDto = createValidCartItemDto();
         ShoppingCartResponseDto expected = createValidShoppingCartResponseDto(
                 user, cartItemDto);
-        when(shoppingCartService.deleteABookFromTheCart(VALID_USER_EMAIL, VALID_CART_ID))
+        when(shoppingCartService.deleteABookFromTheCart(nullable(String.class), eq(VALID_CART_ID)))
                 .thenReturn(expected);
 
         //when & then
@@ -143,7 +141,7 @@ public class ShoppingCartControllerTest {
     @Test
     public void deleteCartItem_InvalidCartItemId_ReturnsNotFound() throws Exception {
         //given
-        when(shoppingCartService.deleteABookFromTheCart(VALID_USER_EMAIL, INVALID_CART_ID))
+        when(shoppingCartService.deleteABookFromTheCart(any(), eq(INVALID_CART_ID)))
                 .thenThrow(new EntityNotFoundException("Cart item not found"));
 
         // when & then
@@ -164,7 +162,8 @@ public class ShoppingCartControllerTest {
                 user, cartItemDto);
 
         when(shoppingCartService
-                .updateABookInTheCart(VALID_USER_EMAIL, VALID_CART_ID, quantity))
+                .updateABookInTheCart(nullable(String.class), eq(VALID_CART_ID),
+                        eq(quantity)))
                 .thenReturn(expected);
 
         //when & then
@@ -189,7 +188,7 @@ public class ShoppingCartControllerTest {
         UpdateShoppingCartQuantityDto quantity = new UpdateShoppingCartQuantityDto(10);
 
         when(shoppingCartService.updateABookInTheCart(
-                VALID_USER_EMAIL, INVALID_CART_ID, quantity))
+                any(), eq(INVALID_CART_ID), eq(quantity)))
                 .thenThrow(new EntityNotFoundException(
                         "Cart with id: " + INVALID_CART_ID + " does not exist"));
         //when & then
