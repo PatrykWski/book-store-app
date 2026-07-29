@@ -1,4 +1,4 @@
-package bookstore.bookstore;
+package bookstore;
 
 import org.springframework.boot.test.context.SpringBootTest;
 

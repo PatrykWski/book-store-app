@@ -1,6 +1,7 @@
 package bookstore.dto.book;
 
 import java.math.BigDecimal;
+import java.util.Objects;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -14,4 +15,18 @@ public class BookDtoWithoutCategoryIds {
     private String isbn;
     private String description;
     private String coverImage;
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        BookDtoWithoutCategoryIds that = (BookDtoWithoutCategoryIds) o;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
+    }
 }
