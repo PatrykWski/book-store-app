@@ -2,11 +2,11 @@ package bookstore.controller;
 
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
-import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import bookstore.dto.book.BookDto;
@@ -14,18 +14,18 @@ import bookstore.dto.book.BookSearchParametersDto;
 import bookstore.dto.book.CreateBookRequestDto;
 import bookstore.exception.EntityNotFoundException;
 import bookstore.model.Category;
+import bookstore.security.JwtUtil;
 import bookstore.service.BookService;
+import bookstore.service.CustomUserDetailService;
 import bookstore.util.RestResponsePage;
 import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -36,17 +36,15 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 import tools.jackson.databind.ObjectMapper;
 
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@WebMvcTest(BookController.class)
 public class BookControllerTest {
-
-    protected static MockMvc mockMvc;
-
     private static final Long VALID_ID = 1L;
     private static final Long INVALID_ID = 99L;
+
+    @Autowired
+    protected MockMvc mockMvc;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -54,14 +52,11 @@ public class BookControllerTest {
     @MockitoBean
     private BookService bookService;
 
-    @BeforeAll
-    static void beforeAll(@Autowired
-                          WebApplicationContext applicationContext) {
-        mockMvc = MockMvcBuilders
-                .webAppContextSetup(applicationContext)
-                .apply(springSecurity())
-                .build();
-    }
+    @MockitoBean
+    private JwtUtil jwtUtil;
+
+    @MockitoBean
+    private CustomUserDetailService customUserDetailService;
 
     @Test
     @WithMockUser(username = "user", roles = "USER")
@@ -92,16 +87,18 @@ public class BookControllerTest {
 
     @Test
     @WithMockUser(username = "user", roles = "USER")
-    public void getAll_BooksDoesNotExists_ReturnsEmptyPage() throws Exception {
+    public void getAll_BooksDoNotExist_ReturnsEmptyPage() throws Exception {
         //given
-        Pageable pageable = PageRequest.of(0, 20, Sort.by("title"));
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("title"));
         Page<BookDto> bookDtoPage = new PageImpl<>(List.of(), pageable, 0);
         when(bookService.findAll(pageable)).thenReturn(bookDtoPage);
 
         //when & then
         mockMvc.perform(get("/api/books")
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").isEmpty())
+                .andExpect(jsonPath("$.totalElements").value(0));
     }
 
     @Test
@@ -256,9 +253,9 @@ public class BookControllerTest {
 
         BookDto bookDto = new BookDto();
         bookDto.setTitle("Wiedźmin");
-        Page<BookDto> excepted = new PageImpl<>(List.of(bookDto), pageable, 1);
+        Page<BookDto> expected = new PageImpl<>(List.of(bookDto), pageable, 1);
 
-        when(bookService.search(searchParametersDto, pageable)).thenReturn(excepted);
+        when(bookService.search(searchParametersDto, pageable)).thenReturn(expected);
 
         //when
         MvcResult result = mockMvc.perform(get("/api/books/search")
@@ -272,8 +269,8 @@ public class BookControllerTest {
         Page<BookDto> actual = objectMapper.readValue(json, objectMapper.getTypeFactory()
                 .constructParametricType(RestResponsePage.class, BookDto.class));
 
-        Assertions.assertEquals(excepted.getTotalElements(), actual.getTotalElements());
-        Assertions.assertEquals(excepted.getContent().get(0).getTitle(),
+        Assertions.assertEquals(expected.getTotalElements(), actual.getTotalElements());
+        Assertions.assertEquals(expected.getContent().get(0).getTitle(),
                 actual.getContent().get(0).getTitle());
     }
 

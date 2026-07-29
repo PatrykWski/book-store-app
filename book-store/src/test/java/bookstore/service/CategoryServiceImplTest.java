@@ -52,7 +52,7 @@ public class CategoryServiceImplTest {
     private CategoryServiceImpl categoryService;
 
     @Test
-    public void findAll_CategoriesExists_ReturnPage() {
+    public void findAll_CategoriesExist_ReturnPage() {
         //given
         Pageable pageable = PageRequest.of(0, 10);
         Category category = createValidCategory();

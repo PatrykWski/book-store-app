@@ -2,7 +2,6 @@ package bookstore.controller;
 
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
-import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -13,16 +12,16 @@ import bookstore.dto.book.BookDtoWithoutCategoryIds;
 import bookstore.dto.category.CategoryDto;
 import bookstore.dto.category.CategoryRequestDto;
 import bookstore.exception.EntityNotFoundException;
+import bookstore.security.JwtUtil;
 import bookstore.service.CategoryService;
+import bookstore.service.CustomUserDetailService;
 import bookstore.util.RestResponsePage;
 import java.math.BigDecimal;
 import java.util.List;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -33,17 +32,16 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 import tools.jackson.databind.ObjectMapper;
 
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@WebMvcTest(CategoryController.class)
 public class CategoryControllerTest {
-
-    protected static MockMvc mockMvc;
 
     private static final Long VALID_ID = 1L;
     private static final Long INVALID_ID = 2L;
+
+    @Autowired
+    protected MockMvc mockMvc;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -51,14 +49,11 @@ public class CategoryControllerTest {
     @MockitoBean
     private CategoryService categoryService;
 
-    @BeforeAll
-    static void beforeAll(@Autowired
-                          WebApplicationContext applicationContext) {
-        mockMvc = MockMvcBuilders
-                .webAppContextSetup(applicationContext)
-                .apply(springSecurity())
-                .build();
-    }
+    @MockitoBean
+    private JwtUtil jwtUtil;
+
+    @MockitoBean
+    private CustomUserDetailService customUserDetailService;
 
     @Test
     @WithMockUser(username = "admin", roles = "ADMIN")
@@ -96,7 +91,7 @@ public class CategoryControllerTest {
 
     @Test
     @WithMockUser(username = "user", roles = "USER")
-    public void getAll_CategoriesExists_ReturnsPage() throws Exception {
+    public void getAll_CategoriesExist_ReturnsPage() throws Exception {
         //given
         CategoryDto categoryDto = createValidCategoryDto();
 
@@ -148,8 +143,8 @@ public class CategoryControllerTest {
     @WithMockUser(username = "user", roles = "USER")
     public void getCategoryById_ValidId_ReturnsCategoryDto() throws Exception {
         //given
-        CategoryDto excepted = createValidCategoryDto();
-        when(categoryService.getById(VALID_ID)).thenReturn(excepted);
+        CategoryDto expected = createValidCategoryDto();
+        when(categoryService.getById(VALID_ID)).thenReturn(expected);
 
         //when
         MvcResult result = mockMvc.perform(get("/api/categories/{id}", VALID_ID)
@@ -161,7 +156,7 @@ public class CategoryControllerTest {
         String json = result.getResponse().getContentAsString();
         CategoryDto actual = objectMapper.readValue(json, CategoryDto.class);
 
-        Assertions.assertEquals(excepted, actual);
+        Assertions.assertEquals(expected, actual);
     }
 
     @Test
