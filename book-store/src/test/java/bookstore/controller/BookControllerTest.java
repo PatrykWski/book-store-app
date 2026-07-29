@@ -1,10 +1,7 @@
 package bookstore.controller;
 
-import bookstore.security.JwtUtil;
-import bookstore.service.CustomUserDetailService;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
-import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -17,7 +14,9 @@ import bookstore.dto.book.BookSearchParametersDto;
 import bookstore.dto.book.CreateBookRequestDto;
 import bookstore.exception.EntityNotFoundException;
 import bookstore.model.Category;
+import bookstore.security.JwtUtil;
 import bookstore.service.BookService;
+import bookstore.service.CustomUserDetailService;
 import bookstore.util.RestResponsePage;
 import java.math.BigDecimal;
 import java.util.HashSet;
@@ -26,6 +25,7 @@ import java.util.Set;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -40,12 +40,11 @@ import tools.jackson.databind.ObjectMapper;
 
 @WebMvcTest(BookController.class)
 public class BookControllerTest {
+    private static final Long VALID_ID = 1L;
+    private static final Long INVALID_ID = 99L;
 
     @Autowired
     protected MockMvc mockMvc;
-
-    private static final Long VALID_ID = 1L;
-    private static final Long INVALID_ID = 99L;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -88,7 +87,7 @@ public class BookControllerTest {
 
     @Test
     @WithMockUser(username = "user", roles = "USER")
-    public void getAll_BooksDoesNotExists_ReturnsEmptyPage() throws Exception {
+    public void getAll_BooksDoNotExist_ReturnsEmptyPage() throws Exception {
         //given
         Pageable pageable = PageRequest.of(0, 10, Sort.by("title"));
         Page<BookDto> bookDtoPage = new PageImpl<>(List.of(), pageable, 0);
@@ -254,9 +253,9 @@ public class BookControllerTest {
 
         BookDto bookDto = new BookDto();
         bookDto.setTitle("Wiedźmin");
-        Page<BookDto> excepted = new PageImpl<>(List.of(bookDto), pageable, 1);
+        Page<BookDto> expected = new PageImpl<>(List.of(bookDto), pageable, 1);
 
-        when(bookService.search(searchParametersDto, pageable)).thenReturn(excepted);
+        when(bookService.search(searchParametersDto, pageable)).thenReturn(expected);
 
         //when
         MvcResult result = mockMvc.perform(get("/api/books/search")
@@ -270,8 +269,8 @@ public class BookControllerTest {
         Page<BookDto> actual = objectMapper.readValue(json, objectMapper.getTypeFactory()
                 .constructParametricType(RestResponsePage.class, BookDto.class));
 
-        Assertions.assertEquals(excepted.getTotalElements(), actual.getTotalElements());
-        Assertions.assertEquals(excepted.getContent().get(0).getTitle(),
+        Assertions.assertEquals(expected.getTotalElements(), actual.getTotalElements());
+        Assertions.assertEquals(expected.getContent().get(0).getTitle(),
                 actual.getContent().get(0).getTitle());
     }
 
