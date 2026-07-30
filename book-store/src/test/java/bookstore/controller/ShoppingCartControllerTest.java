@@ -103,12 +103,26 @@ public class ShoppingCartControllerTest {
 
     @Test
     public void getCart_ByValidEmail_ReturnsShoppingCartDto() throws Exception {
-        // given & when & then
-        mockMvc.perform(get("/api/cart")
+        //given
+        User user = createValidUser();
+        CartItemDto cartItemDto = createValidCartItemDto();
+        ShoppingCartResponseDto expected = createValidShoppingCartResponseDto(user, cartItemDto);
+
+        when(shoppingCartService.showACart(nullable(String.class)))
+                .thenReturn(expected);
+
+        //when & then
+        MvcResult result = mockMvc.perform(get("/api/cart")
                         .with(authentication(new TestingAuthenticationToken(
                                 VALID_USER_EMAIL, null, "ROLE_USER")))
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andReturn();
+        String json = result.getResponse().getContentAsString();
+        ShoppingCartResponseDto actual = objectMapper
+                .readValue(json, ShoppingCartResponseDto.class);
+
+        Assertions.assertEquals(expected, actual);
     }
 
     @Test
