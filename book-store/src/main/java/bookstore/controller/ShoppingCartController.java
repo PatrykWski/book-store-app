@@ -10,6 +10,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,16 +35,17 @@ public class ShoppingCartController {
             description = "Adds a selected book and quantity to the authenticated user's cart")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ShoppingCartResponseDto addCartItem(
-            @AuthenticationPrincipal String userEmail,
+            @AuthenticationPrincipal Authentication authentication,
             @Valid @RequestBody AddBookRequestDto addBookRequestDto) {
-        return shoppingCartService.addABookToACart(userEmail, addBookRequestDto);
+        return shoppingCartService.addABookToACart(authentication.getName(), addBookRequestDto);
     }
 
     @GetMapping
     @Operation(summary = "Show a cart", description = "Show users cart")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-    public ShoppingCartResponseDto getCart(@AuthenticationPrincipal String userEmail) {
-        return shoppingCartService.showACart(userEmail);
+    public ShoppingCartResponseDto getCart(
+            @AuthenticationPrincipal Authentication authentication) {
+        return shoppingCartService.showACart(authentication.getName());
     }
 
     @DeleteMapping("/cart-items/{itemCartId}")
@@ -52,18 +54,19 @@ public class ShoppingCartController {
             description = "Delete a book from the cart")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ShoppingCartResponseDto deleteCartItem(
-            @AuthenticationPrincipal String userEmail, @PathVariable Long itemCartId) {
-        return shoppingCartService.deleteABookFromTheCart(userEmail, itemCartId);
+            @AuthenticationPrincipal Authentication authentication,
+            @PathVariable Long itemCartId) {
+        return shoppingCartService.deleteABookFromTheCart(authentication.getName(), itemCartId);
     }
 
     @PutMapping("/cart-item/{cartItemId}")
     @Operation(summary = "Update a book", description = "Update a book in the cart")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ShoppingCartResponseDto updateCartItem(
-            @AuthenticationPrincipal String userEmail,
+            @AuthenticationPrincipal Authentication authentication,
             @PathVariable Long cartItemId,
             @Valid @RequestBody UpdateShoppingCartQuantityDto updateShoppingCartQuantityDto) {
         return shoppingCartService.updateABookInTheCart(
-                userEmail, cartItemId, updateShoppingCartQuantityDto);
+                authentication.getName(), cartItemId, updateShoppingCartQuantityDto);
     }
 }

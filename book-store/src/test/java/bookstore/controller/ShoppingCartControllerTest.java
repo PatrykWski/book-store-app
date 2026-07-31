@@ -4,7 +4,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.when;
+import org.springframework.security.test.context.support.WithMockUser;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -57,6 +59,7 @@ public class ShoppingCartControllerTest {
     private CustomUserDetailService customUserDetailService;
 
     @Test
+    @WithMockUser(username = "patryk@gmail.com", roles = "USER")
     public void addCartItem_ValidRequest_ReturnsShoppingCartResponseDto() throws Exception {
         //given
         User user = createValidUser();
@@ -64,14 +67,12 @@ public class ShoppingCartControllerTest {
         AddBookRequestDto addBookRequestDto = createValidAddBookRequestDto();
         ShoppingCartResponseDto expected = createValidShoppingCartResponseDto(
                 user, cartItemDto);
-        when(shoppingCartService.addABookToACart(nullable(String.class),
+        when(shoppingCartService.addABookToACart(eq(user.getEmail()),
                 any(AddBookRequestDto.class)))
                 .thenReturn(expected);
 
         //when
         MvcResult result = mockMvc.perform(post("/api/cart")
-                        .with(authentication(new TestingAuthenticationToken(
-                                VALID_USER_EMAIL, null, "ROLE_USER")))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(addBookRequestDto)))
                 .andExpect(status().isCreated())

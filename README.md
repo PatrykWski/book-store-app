@@ -4,16 +4,34 @@ Book store application
 
 ## Description
 
-Secure REST API backend build for an online bookstore. I made it to handle things like user registration, managing a shopping cart and browsing books.
+This application is a backend implementation of an e-commerce bookstore, designed with a focus on security and clean architecture.
 
-## Getting Started
+# Features:
+* Authenticaton & Authorization: The app uses tokens (JWT) to secure endpoints. It is designed with two roles: 'ADMIN' and 'USER'. Each user has their own shopping cart and is able to make an order.
+* Admin & User capabilities:
+    * Admin can add, update, and manage books and categories.
+    * User can view books, search by category, add items to the cart, and place an order.
+* Validation: The application checks input data (for example, correct email format or non-empty fields) to prevent bad requests.
+* Global Exception Handling: Errors are handled globally and return clear JSON messages.
+* Testing: The project includes unit tests for controllers, services and repositories.
 
 ### Dependencies
 
 * Java 22
 * Maven 3.8+
 * MySql Database
-* Os: Windows, macOS, Linux
+* Spring Boot
+* Spring Security
+* JWT
+* Spring Data JPA
+* Hibernate
+* Liquibase
+* MapStruct
+* Swagger / OpenAPI
+* Docker
+* JUnit 5
+* Mockito
+* O: Windows, macOS, Linux
 
 ### Installing
 
