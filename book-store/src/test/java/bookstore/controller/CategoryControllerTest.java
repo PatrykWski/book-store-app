@@ -2,6 +2,7 @@ package bookstore.controller;
 
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -14,7 +15,6 @@ import bookstore.dto.category.CategoryRequestDto;
 import bookstore.exception.EntityNotFoundException;
 import bookstore.security.JwtUtil;
 import bookstore.service.CategoryService;
-import bookstore.service.CustomUserDetailService;
 import bookstore.util.RestResponsePage;
 import java.math.BigDecimal;
 import java.util.List;
@@ -35,7 +35,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import tools.jackson.databind.ObjectMapper;
 
 @WebMvcTest(CategoryController.class)
-public class CategoryControllerTest {
+class CategoryControllerTest {
 
     private static final Long VALID_ID = 1L;
     private static final Long INVALID_ID = 2L;
@@ -52,12 +52,9 @@ public class CategoryControllerTest {
     @MockitoBean
     private JwtUtil jwtUtil;
 
-    @MockitoBean
-    private CustomUserDetailService customUserDetailService;
-
     @Test
     @WithMockUser(username = "admin", roles = "ADMIN")
-    public void createCategory_ValidCategoryRequestDto_ReturnsCategoryDto() throws Exception {
+    void createCategory_ValidCategoryRequestDto_ReturnsCategoryDto() throws Exception {
         //given
         CategoryRequestDto categoryRequestDto = createValidCategoryRequestDto();
         CategoryDto expected = createValidCategoryDto();
@@ -65,6 +62,7 @@ public class CategoryControllerTest {
 
         //when
         MvcResult result = mockMvc.perform(post("/api/categories")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(categoryRequestDto)))
                 .andExpect(status().isCreated())
@@ -79,11 +77,12 @@ public class CategoryControllerTest {
 
     @Test
     @WithMockUser(username = "admin", roles = "ADMIN")
-    public void createCategory_InvalidCategoryRequestDto_ReturnsBadRequest() throws Exception {
+    void createCategory_InvalidCategoryRequestDto_ReturnsBadRequest() throws Exception {
         //given
         CategoryRequestDto categoryRequestDto = new CategoryRequestDto();
         //when & then
         mockMvc.perform(post("/api/categories")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(categoryRequestDto)))
                 .andExpect(status().isBadRequest());
@@ -91,7 +90,7 @@ public class CategoryControllerTest {
 
     @Test
     @WithMockUser(username = "user", roles = "USER")
-    public void getAll_CategoriesExist_ReturnsPage() throws Exception {
+    void getAll_CategoriesExist_ReturnsPage() throws Exception {
         //given
         CategoryDto categoryDto = createValidCategoryDto();
 
@@ -118,7 +117,7 @@ public class CategoryControllerTest {
 
     @Test
     @WithMockUser(username = "user", roles = "USER")
-    public void getAll_CategoriesDoesNotExist_ReturnsEmptyPage() throws Exception {
+    void getAll_CategoriesDoesNotExist_ReturnsEmptyPage() throws Exception {
         //given
         Pageable pageable = PageRequest.of(0, 10, Sort.by("name"));
         Page<CategoryDto> expected = new PageImpl<>(List.of());
@@ -141,7 +140,7 @@ public class CategoryControllerTest {
 
     @Test
     @WithMockUser(username = "user", roles = "USER")
-    public void getCategoryById_ValidId_ReturnsCategoryDto() throws Exception {
+    void getCategoryById_ValidId_ReturnsCategoryDto() throws Exception {
         //given
         CategoryDto expected = createValidCategoryDto();
         when(categoryService.getById(VALID_ID)).thenReturn(expected);
@@ -161,7 +160,7 @@ public class CategoryControllerTest {
 
     @Test
     @WithMockUser(username = "user", roles = "USER")
-    public void getCategoryById_InvalidId_ReturnsNotFound() throws Exception {
+    void getCategoryById_InvalidId_ReturnsNotFound() throws Exception {
         //given
         when(categoryService.getById(INVALID_ID)).thenThrow(new EntityNotFoundException(
                 "Category with id: " + INVALID_ID + " doesn't exist"));
@@ -174,7 +173,7 @@ public class CategoryControllerTest {
 
     @Test
     @WithMockUser(username = "admin", roles = "ADMIN")
-    public void updateCategory_ValidRequestDto_ReturnsCategoryDto() throws Exception {
+    void updateCategory_ValidRequestDto_ReturnsCategoryDto() throws Exception {
         //given
         CategoryRequestDto categoryRequestDto = createValidCategoryRequestDto();
         CategoryDto expected = createValidCategoryDto();
@@ -182,6 +181,7 @@ public class CategoryControllerTest {
 
         //when
         MvcResult result = mockMvc.perform(put("/api/categories/{id}", VALID_ID)
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(categoryRequestDto)))
                 .andExpect(status().isOk())
@@ -196,7 +196,7 @@ public class CategoryControllerTest {
 
     @Test
     @WithMockUser(username = "admin", roles = "ADMIN")
-    public void updateCategory_InvalidId_ReturnsNotFound() throws Exception {
+    void updateCategory_InvalidId_ReturnsNotFound() throws Exception {
         //given
         CategoryRequestDto categoryRequestDto = createValidCategoryRequestDto();
         when(categoryService.update(INVALID_ID, categoryRequestDto))
@@ -205,6 +205,7 @@ public class CategoryControllerTest {
 
         //when & then
         mockMvc.perform(put("/api/categories/{id}", INVALID_ID)
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(categoryRequestDto)))
                 .andExpect(status().isNotFound());
@@ -212,29 +213,31 @@ public class CategoryControllerTest {
 
     @Test
     @WithMockUser(username = "admin", roles = "ADMIN")
-    public void deleteCategory_ValidId_ReturnsNoContent() throws Exception {
+    void deleteCategory_ValidId_ReturnsNoContent() throws Exception {
         //given & when & then
         mockMvc.perform(delete("/api/categories/{id}", VALID_ID)
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
     }
 
     @Test
     @WithMockUser(username = "admin", roles = "ADMIN")
-    public void deleteCategory_InvalidId_ReturnsNotFound() throws Exception {
+    void deleteCategory_InvalidId_ReturnsNotFound() throws Exception {
         //given
         doThrow(new EntityNotFoundException("Category with id: " + INVALID_ID + " doesn't exist"))
                 .when(categoryService).deleteById(INVALID_ID);
 
         //when & then
         mockMvc.perform(delete("/api/categories/{id}", INVALID_ID)
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     @WithMockUser(username = "user", roles = "USER")
-    public void getBooksByCategoryId_ValidId_ReturnsPage() throws Exception {
+    void getBooksByCategoryId_ValidId_ReturnsPage() throws Exception {
         //given
         Pageable pageable = PageRequest.of(0, 10, Sort.by("title"));
         BookDtoWithoutCategoryIds bookDtoWithoutId = createValidBookWithoutCategoryIdDto();
@@ -264,7 +267,7 @@ public class CategoryControllerTest {
 
     @Test
     @WithMockUser(username = "user", roles = "USER")
-    public void getBooksByCategoryId_InvalidId_ReturnsEmptyPage() throws Exception {
+    void getBooksByCategoryId_InvalidId_ReturnsEmptyPage() throws Exception {
         //given
         Pageable pageable = PageRequest.of(0, 10, Sort.by("title"));
         Page<BookDtoWithoutCategoryIds> expected = new PageImpl<>(List.of(), pageable, 0);

@@ -2,6 +2,7 @@ package bookstore.controller;
 
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -16,7 +17,6 @@ import bookstore.exception.EntityNotFoundException;
 import bookstore.model.Category;
 import bookstore.security.JwtUtil;
 import bookstore.service.BookService;
-import bookstore.service.CustomUserDetailService;
 import bookstore.util.RestResponsePage;
 import java.math.BigDecimal;
 import java.util.HashSet;
@@ -39,7 +39,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import tools.jackson.databind.ObjectMapper;
 
 @WebMvcTest(BookController.class)
-public class BookControllerTest {
+class BookControllerTest {
     private static final Long VALID_ID = 1L;
     private static final Long INVALID_ID = 99L;
 
@@ -55,12 +55,9 @@ public class BookControllerTest {
     @MockitoBean
     private JwtUtil jwtUtil;
 
-    @MockitoBean
-    private CustomUserDetailService customUserDetailService;
-
     @Test
     @WithMockUser(username = "user", roles = "USER")
-    public void getAll_BooksExist_ReturnsPageOfBooks() throws Exception {
+    void getAll_BooksExist_ReturnsPageOfBooks() throws Exception {
         //given
         Pageable pageable = PageRequest.of(0, 10, Sort.by("title"));
         BookDto bookDto = createValidBookDto();
@@ -87,7 +84,7 @@ public class BookControllerTest {
 
     @Test
     @WithMockUser(username = "user", roles = "USER")
-    public void getAll_BooksDoNotExist_ReturnsEmptyPage() throws Exception {
+    void getAll_BooksDoNotExist_ReturnsEmptyPage() throws Exception {
         //given
         Pageable pageable = PageRequest.of(0, 10, Sort.by("title"));
         Page<BookDto> bookDtoPage = new PageImpl<>(List.of(), pageable, 0);
@@ -103,7 +100,7 @@ public class BookControllerTest {
 
     @Test
     @WithMockUser(username = "user", roles = "USER")
-    public void getBookById_BookExist_ReturnsABook() throws Exception {
+    void getBookById_BookExist_ReturnsABook() throws Exception {
         //given
         BookDto expected = createValidBookDto();
         when(bookService.findById(VALID_ID)).thenReturn(expected);
@@ -124,7 +121,7 @@ public class BookControllerTest {
 
     @Test
     @WithMockUser(username = "user", roles = "USER")
-    public void getBookById_BookDoesNotExist_ReturnsNotFound() throws Exception {
+    void getBookById_BookDoesNotExist_ReturnsNotFound() throws Exception {
         //given
         when(bookService.findById(INVALID_ID)).thenThrow(
                 new EntityNotFoundException("Book with id: " + INVALID_ID + " doesn't exist"));
@@ -137,7 +134,7 @@ public class BookControllerTest {
 
     @Test
     @WithMockUser(username = "admin", roles = "ADMIN")
-    public void createBook_ValidBookRequestDto_ReturnsABook() throws Exception {
+    void createBook_ValidBookRequestDto_ReturnsABook() throws Exception {
         //given
         CreateBookRequestDto createBookRequestDto = createValidBookRequestDto();
         BookDto expected = createValidBookDto();
@@ -145,6 +142,7 @@ public class BookControllerTest {
 
         //when
         MvcResult result = mockMvc.perform(post("/api/books")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(createBookRequestDto)))
                 .andExpect(status().isCreated())
@@ -159,12 +157,13 @@ public class BookControllerTest {
 
     @Test
     @WithMockUser(username = "admin", roles = "ADMIN")
-    public void createBook_InvalidBookRequestDto_ReturnsBadRequest() throws Exception {
+    void createBook_InvalidBookRequestDto_ReturnsBadRequest() throws Exception {
         //given
         CreateBookRequestDto createBookRequestDto = createInvalidBookRequestDto();
 
         //when & then
         mockMvc.perform(post("/api/books")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(createBookRequestDto)))
                 .andExpect(status().isBadRequest());
@@ -172,7 +171,7 @@ public class BookControllerTest {
 
     @Test
     @WithMockUser(username = "admin", roles = "ADMIN")
-    public void updateBook_ValidBookRequestDto_ReturnsABook() throws Exception {
+    void updateBook_ValidBookRequestDto_ReturnsABook() throws Exception {
         //given
         BookDto expected = createValidBookDto();
         CreateBookRequestDto bookRequestDto = createValidBookRequestDto();
@@ -180,6 +179,7 @@ public class BookControllerTest {
 
         //when
         MvcResult result = mockMvc.perform(put("/api/books/{id}", VALID_ID)
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(bookRequestDto)))
                 .andExpect(status().isOk())
@@ -194,7 +194,7 @@ public class BookControllerTest {
 
     @Test
     @WithMockUser(username = "admin", roles = "ADMIN")
-    public void updateBook_InvalidId_ReturnsNotFound() throws Exception {
+    void updateBook_InvalidId_ReturnsNotFound() throws Exception {
         //given
         CreateBookRequestDto createBookRequestDto = createValidBookRequestDto();
         when(bookService.updateBookById(INVALID_ID, createBookRequestDto)).thenThrow(
@@ -202,6 +202,7 @@ public class BookControllerTest {
 
         //when & then
         mockMvc.perform(put("/api/books/{id}", INVALID_ID)
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(createBookRequestDto)))
                 .andExpect(status().isNotFound());
@@ -209,12 +210,13 @@ public class BookControllerTest {
 
     @Test
     @WithMockUser(username = "admin", roles = "ADMIN")
-    public void updateBook_InvalidBookRequest_ReturnsBadRequest() throws Exception {
+    void updateBook_InvalidBookRequest_ReturnsBadRequest() throws Exception {
         //given
         CreateBookRequestDto createBookRequestDto = createInvalidBookRequestDto();
 
         //when & then
         mockMvc.perform(put("/api/books/{id}", VALID_ID)
+                        .with(csrf())
                         .content(objectMapper.writeValueAsString(createBookRequestDto))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
@@ -222,29 +224,31 @@ public class BookControllerTest {
 
     @Test
     @WithMockUser(username = "admin", roles = "ADMIN")
-    public void deleteBook_ValidId_ReturnsNoContent() throws Exception {
+    void deleteBook_ValidId_ReturnsNoContent() throws Exception {
         //given & when & then
         mockMvc.perform(delete("/api/books/{id}", VALID_ID)
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
     }
 
     @Test
     @WithMockUser(username = "admin", roles = "ADMIN")
-    public void deleteBook_InvalidId_ReturnsNotFound() throws Exception {
+    void deleteBook_InvalidId_ReturnsNotFound() throws Exception {
         //given
         doThrow(new EntityNotFoundException("Book with id: " + INVALID_ID + " doesn't exist"))
                 .when(bookService).deleteBookById(INVALID_ID);
 
         // when & then
         mockMvc.perform(delete("/api/books/{id}", INVALID_ID)
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     @WithMockUser(username = "user", roles = "USER")
-    public void search_ValidSearchRequest_ReturnPage() throws Exception {
+    void search_ValidSearchRequest_ReturnPage() throws Exception {
         //given
         BookSearchParametersDto searchParametersDto = new BookSearchParametersDto();
         searchParametersDto.setTitle("Wiedźmin");
@@ -276,7 +280,7 @@ public class BookControllerTest {
 
     @Test
     @WithMockUser(username = "user", roles = "USER")
-    public void search_InvalidSearchRequest_ReturnBadRequest() throws Exception {
+    void search_InvalidSearchRequest_ReturnBadRequest() throws Exception {
         //when & then
         mockMvc.perform(get("/api/books/search")
                         .param("minPrice", "-5")
