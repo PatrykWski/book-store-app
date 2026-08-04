@@ -209,12 +209,13 @@ spring.datasource.password=your_password   <-- here u have to write your passwor
 4. Liquidbase creates tables automatically - you dont have to create them in database.
 
 5. Create .env file and configure it as u wish, example: 
+* There is .envExampleFile where u can find example .env file with test admin details to test admin endpoints.
 ```
-MYSQLDB_USER=book_store_user
-MYSQLDB_PASSWORD=book_store_password
-MYSQLDB_ROOT_PASSWORD=root_password
+MYSQLDB_USER=store_user
+MYSQLDB_PASSWORD=store_password
+MYSQLDB_ROOT_PASSWORD=store_user_password
 MYSQLDB_DATABASE=book_store
-MYSQLDB_LOCAL_PORT=3306
+MYSQLDB_LOCAL_PORT=3307
 MYSQLDB_DOCKER_PORT=3306
 SPRING_LOCAL_PORT=8080
 SPRING_DOCKER_PORT=8080
@@ -245,7 +246,7 @@ http://localhost:8080/swagger-ui/index.html
 ```
 1. Create a new user in registration endpoint.
 2. Log in and remember to copy and save (!) your token otherwise u can not use other endpoints in the app.
-3. Choose one of the endpoints for role 'USER', press authentication button, pase your token and try out the endpoint.
+3. Choose one of the endpoints for role 'USER', press authorize button, pase your token and try out the endpoint.
 
 ## Postman
 * Download and install postman application on your system,
