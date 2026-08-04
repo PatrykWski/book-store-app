@@ -59,12 +59,12 @@ graph LR
         DB[(MySQL Database)]
     end
 
-    FE -->|HTTP Request (JSON)| C
+    FE -->|HTTP Request JSON| C
     C -->|Business Logic| S
-    S -->|JPA/Hibernate| R
+    S -->|JPA / Hibernate| R
     R -->|SQL| DB
     DB -->|Entity| R
-    R -->|DTO/Object| S
+    R -->|DTO / Object| S
     S -->|Response| C
     C -->|HTTP Response| FE
 
