@@ -10,8 +10,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -35,17 +35,17 @@ public class ShoppingCartController {
             description = "Adds a selected book and quantity to the authenticated user's cart")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ShoppingCartResponseDto addCartItem(
-            @AuthenticationPrincipal Authentication authentication,
+            @AuthenticationPrincipal UserDetails userDetails,
             @Valid @RequestBody AddBookRequestDto addBookRequestDto) {
-        return shoppingCartService.addABookToACart(authentication.getName(), addBookRequestDto);
+        return shoppingCartService.addABookToACart(userDetails.getUsername(), addBookRequestDto);
     }
 
     @GetMapping
     @Operation(summary = "Show a cart", description = "Show users cart")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ShoppingCartResponseDto getCart(
-            @AuthenticationPrincipal Authentication authentication) {
-        return shoppingCartService.showACart(authentication.getName());
+            @AuthenticationPrincipal UserDetails userDetails) {
+        return shoppingCartService.showACart(userDetails.getUsername());
     }
 
     @DeleteMapping("/cart-items/{itemCartId}")
@@ -54,19 +54,19 @@ public class ShoppingCartController {
             description = "Delete a book from the cart")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ShoppingCartResponseDto deleteCartItem(
-            @AuthenticationPrincipal Authentication authentication,
+            @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable Long itemCartId) {
-        return shoppingCartService.deleteABookFromTheCart(authentication.getName(), itemCartId);
+        return shoppingCartService.deleteABookFromTheCart(userDetails.getUsername(), itemCartId);
     }
 
     @PutMapping("/cart-item/{cartItemId}")
     @Operation(summary = "Update a book", description = "Update a book in the cart")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ShoppingCartResponseDto updateCartItem(
-            @AuthenticationPrincipal Authentication authentication,
+            @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable Long cartItemId,
             @Valid @RequestBody UpdateShoppingCartQuantityDto updateShoppingCartQuantityDto) {
         return shoppingCartService.updateABookInTheCart(
-                authentication.getName(), cartItemId, updateShoppingCartQuantityDto);
+                userDetails.getUsername(), cartItemId, updateShoppingCartQuantityDto);
     }
 }
