@@ -3,8 +3,9 @@ package bookstore.controller;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -20,7 +21,6 @@ import bookstore.model.Role;
 import bookstore.model.RoleName;
 import bookstore.model.User;
 import bookstore.security.JwtUtil;
-import bookstore.service.CustomUserDetailService;
 import bookstore.service.ShoppingCartService;
 import java.util.HashSet;
 import java.util.Set;
@@ -29,13 +29,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.authentication.TestingAuthenticationToken;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import tools.jackson.databind.ObjectMapper;
 
 @WebMvcTest(ShoppingCartController.class)
+@WithMockUser(username = "patryk@gmail.com", roles = "USER")
 public class ShoppingCartControllerTest {
     private static final String VALID_USER_EMAIL = "patryk@gmail.com";
     private static final Long VALID_CART_ID = 1L;
@@ -53,25 +54,22 @@ public class ShoppingCartControllerTest {
     @MockitoBean
     private JwtUtil jwtUtil;
 
-    @MockitoBean
-    private CustomUserDetailService customUserDetailService;
-
     @Test
     public void addCartItem_ValidRequest_ReturnsShoppingCartResponseDto() throws Exception {
         //given
         User user = createValidUser();
         CartItemDto cartItemDto = createValidCartItemDto();
+
         AddBookRequestDto addBookRequestDto = createValidAddBookRequestDto();
         ShoppingCartResponseDto expected = createValidShoppingCartResponseDto(
                 user, cartItemDto);
-        when(shoppingCartService.addABookToACart(nullable(String.class),
+        when(shoppingCartService.addABookToACart(eq(VALID_USER_EMAIL),
                 any(AddBookRequestDto.class)))
                 .thenReturn(expected);
 
         //when
         MvcResult result = mockMvc.perform(post("/api/cart")
-                        .with(authentication(new TestingAuthenticationToken(
-                                VALID_USER_EMAIL, null, "ROLE_USER")))
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(addBookRequestDto)))
                 .andExpect(status().isCreated())
@@ -83,6 +81,10 @@ public class ShoppingCartControllerTest {
                 .readValue(json, ShoppingCartResponseDto.class);
 
         Assertions.assertEquals(expected, actual);
+
+        verify(shoppingCartService).addABookToACart(
+                eq(VALID_USER_EMAIL),
+                any(AddBookRequestDto.class));
     }
 
     @Test
@@ -95,8 +97,7 @@ public class ShoppingCartControllerTest {
         //when & then
         mockMvc.perform(post("/api/cart")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .with(authentication(new TestingAuthenticationToken(
-                                VALID_USER_EMAIL, null, "ROLE_USER")))
+                        .with(csrf())
                         .content(objectMapper.writeValueAsString(addBookRequestDto)))
                 .andExpect(status().isBadRequest());
     }
@@ -113,8 +114,7 @@ public class ShoppingCartControllerTest {
 
         //when & then
         MvcResult result = mockMvc.perform(get("/api/cart")
-                        .with(authentication(new TestingAuthenticationToken(
-                                VALID_USER_EMAIL, null, "ROLE_USER")))
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -138,8 +138,7 @@ public class ShoppingCartControllerTest {
         //when & then
         MvcResult result = mockMvc.perform(delete("/api/cart/cart-items/{itemCartId}",
                         VALID_CART_ID)
-                        .with(authentication(new TestingAuthenticationToken(
-                                VALID_USER_EMAIL, null, "ROLE_USER")))
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -160,8 +159,7 @@ public class ShoppingCartControllerTest {
 
         // when & then
         mockMvc.perform(delete("/api/cart/cart-items/{cartItemId}", INVALID_CART_ID)
-                        .with(authentication(new TestingAuthenticationToken(
-                                VALID_USER_EMAIL, null, "ROLE_USER")))
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
     }
@@ -182,8 +180,7 @@ public class ShoppingCartControllerTest {
 
         //when & then
         MvcResult result = mockMvc.perform(put("/api/cart/cart-item/{itemCartId}", VALID_CART_ID)
-                        .with(authentication(new TestingAuthenticationToken(
-                                VALID_USER_EMAIL, null, "ROLE_USER")))
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(quantity)))
                 .andExpect(status().isOk())
@@ -207,8 +204,7 @@ public class ShoppingCartControllerTest {
                         "Cart with id: " + INVALID_CART_ID + " does not exist"));
         //when & then
         mockMvc.perform(put("/api/cart/cart-item/{cartItemId}", INVALID_CART_ID)
-                        .with(authentication(new TestingAuthenticationToken(
-                                VALID_USER_EMAIL, null, "ROLE_USER")))
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(quantity)))
                 .andExpect(status().isNotFound());
@@ -221,8 +217,7 @@ public class ShoppingCartControllerTest {
 
         //when & then
         mockMvc.perform(put("/api/cart/cart-item/{cartItemId}", VALID_CART_ID)
-                        .with(authentication(new TestingAuthenticationToken(
-                                VALID_USER_EMAIL, null, "ROLE_USER")))
+                        .with(csrf())
                         .content(objectMapper.writeValueAsString(quantity))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
@@ -231,7 +226,7 @@ public class ShoppingCartControllerTest {
     private User createValidUser() {
         User user = new User();
         user.setId(1L);
-        user.setEmail("patryk@gmail.com");
+        user.setEmail(VALID_USER_EMAIL);
         user.setPassword("strongpassword");
         user.setFirstName("Patryk");
         user.setLastName("Kowalski");
