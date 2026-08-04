@@ -2,6 +2,7 @@ package bookstore.controller;
 
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -14,7 +15,6 @@ import bookstore.dto.category.CategoryRequestDto;
 import bookstore.exception.EntityNotFoundException;
 import bookstore.security.JwtUtil;
 import bookstore.service.CategoryService;
-import bookstore.service.CustomUserDetailService;
 import bookstore.util.RestResponsePage;
 import java.math.BigDecimal;
 import java.util.List;
@@ -35,7 +35,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import tools.jackson.databind.ObjectMapper;
 
 @WebMvcTest(CategoryController.class)
-public class CategoryControllerTest {
+class CategoryControllerTest {
 
     private static final Long VALID_ID = 1L;
     private static final Long INVALID_ID = 2L;
@@ -52,9 +52,6 @@ public class CategoryControllerTest {
     @MockitoBean
     private JwtUtil jwtUtil;
 
-    @MockitoBean
-    private CustomUserDetailService customUserDetailService;
-
     @Test
     @WithMockUser(username = "admin", roles = "ADMIN")
     public void createCategory_ValidCategoryRequestDto_ReturnsCategoryDto() throws Exception {
@@ -65,6 +62,7 @@ public class CategoryControllerTest {
 
         //when
         MvcResult result = mockMvc.perform(post("/api/categories")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(categoryRequestDto)))
                 .andExpect(status().isCreated())
@@ -84,6 +82,7 @@ public class CategoryControllerTest {
         CategoryRequestDto categoryRequestDto = new CategoryRequestDto();
         //when & then
         mockMvc.perform(post("/api/categories")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(categoryRequestDto)))
                 .andExpect(status().isBadRequest());
@@ -182,6 +181,7 @@ public class CategoryControllerTest {
 
         //when
         MvcResult result = mockMvc.perform(put("/api/categories/{id}", VALID_ID)
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(categoryRequestDto)))
                 .andExpect(status().isOk())
@@ -205,6 +205,7 @@ public class CategoryControllerTest {
 
         //when & then
         mockMvc.perform(put("/api/categories/{id}", INVALID_ID)
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(categoryRequestDto)))
                 .andExpect(status().isNotFound());
@@ -215,6 +216,7 @@ public class CategoryControllerTest {
     public void deleteCategory_ValidId_ReturnsNoContent() throws Exception {
         //given & when & then
         mockMvc.perform(delete("/api/categories/{id}", VALID_ID)
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
     }
@@ -228,6 +230,7 @@ public class CategoryControllerTest {
 
         //when & then
         mockMvc.perform(delete("/api/categories/{id}", INVALID_ID)
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
     }
