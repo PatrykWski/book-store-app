@@ -1,8 +1,6 @@
 package bookstore.service;
 
-import bookstore.exception.EntityNotFoundException;
 import bookstore.model.Role;
-import bookstore.model.RoleName;
 import bookstore.model.User;
 import bookstore.repository.RoleRepository;
 import bookstore.repository.UserRepository;
@@ -19,7 +17,8 @@ public class UserInitializerService {
     private final PasswordEncoder passwordEncoder;
     private final RoleRepository roleRepository;
 
-    public boolean initializeUser(String email, String rawPassword, String firstName, String lastName) {
+    public boolean initializeUser(String email, String rawPassword,
+                                  String firstName, String lastName) {
         if (userRepository.findByEmail(email).isPresent()) {
             return false;
         }
