@@ -1,13 +1,11 @@
-# Project Title
-
-Book store application
+# Book Store REST API
 
 ## Description
 
 This application is a backend implementation of an e-commerce bookstore, designed with a focus on security and clean architecture.
 
-# Features:
-* Authenticaton & Authorization: The app uses tokens (JWT) to secure endpoints. It is designed with two roles: 'ADMIN' and 'USER'. Each user has their own shopping cart and is able to make an order.
+## Features:
+* Authentication & Authorization: The app uses tokens (JWT) to secure endpoints. It is designed with two roles: 'ADMIN' and 'USER'. Each user has their own shopping cart and is able to make an order.
 * Admin & User capabilities:
     * Admin can add, update, and manage books and categories.
     * User can view books, search by category, add items to the cart, and place an order.
@@ -25,9 +23,6 @@ This application is a backend implementation of an e-commerce bookstore, designe
 
 ### Technologies
 
-* Java 22
-* Maven 3.8+
-* MySql Database
 * Spring Boot
 * Spring Security
 * JWT
@@ -163,22 +158,22 @@ erDiagram
 ### Functionality
 
 * AuthenticationController - registration and login,
-- Permissions free
+    - Permissions free
 * BookController - CRUD operations, pagination and search,
-- Requires 'ADMIN' to create, delete or update a book,
-- Requires 'USER' or 'ADMIN' to get a book or page of books.
+    - Requires 'ADMIN' to create, delete or update a book,
+    - Requires 'USER' or 'ADMIN' to get a book or page of books.
 * CategoryController - category management,
-- Requires 'ADMIN' to create, delete or update a category,
-- Requires 'USER' or 'ADMIN' to get all categories, to get category by id,
-- Requires 'USER' or 'ADMIN' to get books by category id.
+    - Requires 'ADMIN' to create, delete or update a category,
+    - Requires 'USER' or 'ADMIN' to get all categories, to get category by id,
+    - Requires 'USER' or 'ADMIN' to get books by category id.
 * ShoppingCartController - cart items management,
-- Requires 'ADMIN' or 'USER' to see shopping cart,
-- Requires 'ADMIN' or 'USER' to add or delete cart item from the shopping cart,
-- Requires 'ADMIN' or 'USER' to update cart item in the shopping cart.
+    - Requires 'ADMIN' or 'USER' to see shopping cart,
+    - Requires 'ADMIN' or 'USER' to add or delete cart item from the shopping cart,
+    - Requires 'ADMIN' or 'USER' to update cart item in the shopping cart.
 * OrderController - placing orders, updating their statuses.
-- Requires 'ADMIN' to update order status,
-- Requires 'ADMIN' or 'USER' to get order item by id, get all order items,
-- Requires 'ADMIN' or 'USER' to see a history of orders or place an order.
+    - Requires 'ADMIN' to update order status,
+    - Requires 'ADMIN' or 'USER' to get order item by id, get all order items,
+    - Requires 'ADMIN' or 'USER' to see a history of orders or place an order.
 
 
 ### Installing
@@ -193,11 +188,11 @@ cd book-store-app/book-store
 * On the left site of the application you will see a plus button. Press it,
 * Write down your connection name for example: book_store
 * In parameters section press Store in Vault button and write down your which u gonna use in the project,
-* Test connection and press ok button
+* Test connection and click the OK button
 * Press two times on your new database connection
 * On new window write down in the main page "CREATE DATABASE book_store;
 * Above it you can see lightning - press it,
-* Congratulation you made a new database. 
+* Congratulations you made a new database. 
 
 3. Configure your database in: src/main/resources/application.properties
 ```bash
@@ -206,7 +201,7 @@ spring.datasource.username=root
 spring.datasource.password=your_password   <-- here u have to write your password which you used when u was creating new database
 ```
 
-4. Liquidbase creates tables automatically - you dont have to create them in database.
+4. Liquibase creates tables automatically - you don't have to create them in database.
 
 5. Create .env file and configure it as u wish, example: 
 * There is .envExampleFile where u can find example .env file with test admin details to test admin endpoints.
@@ -245,7 +240,7 @@ mvn clean spring-boot:run
 http://localhost:8080/swagger-ui/index.html
 ```
 1. Create a new user in registration endpoint.
-2. Log in and remember to copy and save (!) your token otherwise u can not use other endpoints in the app.
+2. Log in and remember to copy and save (!) your token otherwise you can not use other endpoints in the app.
 3. Choose one of the endpoints for role 'USER', press authorize button, pase your token and try out the endpoint.
 
 ## Postman
